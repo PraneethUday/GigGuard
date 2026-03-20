@@ -38,12 +38,20 @@ India's gig delivery workforce is the backbone of the digital economy. However, 
 
 GigGuard solves this with four core pillars:
 
-1. AI-Powered Weekly Premiums — Dynamic, hyper-local risk pricing computed weekly using ML models trained on weather forecasts, location risk, earnings history, loyalty, and cross-platform activity.
-2. Profit-Aware Regional Pricing — The AI model monitors upcoming weather probability by region and adjusts premiums proactively to ensure the company never operates at a loss, without penalising workers in low-risk zones.
-3. Parametric Automation — Real-time monitoring of disruption triggers (rain, AQI, curfew data). When a threshold is crossed, claims are automatically initiated and payouts processed with no manual filing required.
-4. Intelligent Fraud Detection — Anomaly detection, GPS validation, minimum eligibility verification, and duplicate prevention to ensure payout integrity.
+1. **AI-Powered Weekly Premiums** — Dynamic, hyper-local risk pricing computed weekly using ML models trained on weather forecasts, location risk, earnings history, loyalty, and cross-platform activity.
+2. **Profit-Aware Regional Pricing** — The AI model monitors upcoming weather probability by region and adjusts premiums proactively to ensure the company never operates at a loss, without penalising workers in low-risk zones.
+3. **Parametric Automation** — Real-time monitoring of disruption triggers (rain, AQI, curfew data). When a threshold is crossed, claims are automatically initiated and payouts processed with no manual filing required.
+4. **Intelligent Fraud Detection** — Anomaly detection, GPS validation, minimum eligibility verification, and duplicate prevention to ensure payout integrity.
 
-> Coverage Scope: Income loss ONLY. Health, life, accidents, and vehicle repair coverage are strictly excluded.
+> **Coverage Scope: Income loss ONLY.** Health, life, accidents, and vehicle repair coverage are strictly excluded.
+
+---
+
+## Video Walkthrough
+
+> **[▶ Watch our 2-minute strategy video here](https://YOUR_VIDEO_LINK_HERE)**
+
+The video covers our chosen persona (food delivery partners), the GigGuard product strategy, the weekly premium model, our parametric trigger approach, and a walkthrough of the prototype scope for Phase 1.
 
 ---
 
@@ -59,11 +67,11 @@ GigGuard also supports multi-platform workers — a single worker can be registe
 
 ### Scenario 1 — Heavy Rainfall (Environmental Disruption)
 
-Character: Ravi, a Zomato delivery partner in Chennai, working 8 hours/day, earning approximately Rs. 2,800/week across Zomato and Amazon Flex combined.
+**Character:** Ravi, a Zomato delivery partner in Chennai, working 8 hours/day, earning approximately Rs. 2,800/week across Zomato and Amazon Flex combined.
 
-Event: IMD issues a Red Alert for Chennai. Rainfall exceeds 64.5mm in 24 hours. Zomato suspends delivery operations in affected zones.
+**Event:** IMD issues a Red Alert for Chennai. Rainfall exceeds 64.5mm in 24 hours. Zomato suspends delivery operations in affected zones.
 
-GigGuard Response:
+**GigGuard Response:**
 - Weather API detects rainfall threshold breach at 6:14 AM.
 - GigGuard automatically creates a claim for Ravi's policy covering that disruption window.
 - AI validates: Ravi's GPS confirms he was in the active zone; no deliveries were logged on any registered platform; no duplicate claim exists; eligibility check passes (Ravi has worked 3+ weeks).
@@ -74,11 +82,11 @@ GigGuard Response:
 
 ### Scenario 2 — Severe Air Pollution (Environmental Disruption)
 
-Character: Priya, a Swiggy delivery partner in Delhi, 8 hours/day, Rs. 2,400/week average.
+**Character:** Priya, a Swiggy delivery partner in Delhi, 8 hours/day, Rs. 2,400/week average.
 
-Event: AQI in Priya's zone crosses 401 (Severe category). Delhi government issues a GRAP advisory halting two-wheeler movement.
+**Event:** AQI in Priya's zone crosses 401 (Severe category). Delhi government issues a GRAP advisory halting two-wheeler movement.
 
-GigGuard Response:
+**GigGuard Response:**
 - AQI API detects threshold breach (>400) in Priya's registered zone.
 - Parametric trigger fires; GigGuard auto-initiates claim.
 - Fraud engine checks: GPS confirms Priya was not working (no delivery pings in platform data), cross-references GRAP bulletin.
@@ -88,11 +96,11 @@ GigGuard Response:
 
 ### Scenario 3 — Unplanned Curfew / Section 144 (Social Disruption)
 
-Character: Arjun, a multi-platform rider in Bengaluru registered on both Swiggy and Amazon Flex, working evening slots from 5 PM to 11 PM.
+**Character:** Arjun, a multi-platform rider in Bengaluru registered on both Swiggy and Amazon Flex, working evening slots from 5 PM to 11 PM.
 
-Event: Local authorities impose a sudden Section 144 curfew in a 3-km radius. Arjun's zone is locked down for 4 hours during his peak earning window.
+**Event:** Local authorities impose a sudden Section 144 curfew in a 3-km radius. Arjun's zone is locked down for 4 hours during his peak earning window.
 
-GigGuard Response:
+**GigGuard Response:**
 - GigGuard ingests government notification feeds and news APIs.
 - Curfew zone is matched against Arjun's registered delivery zone across both platforms.
 - Parametric trigger fires; claim auto-created for the disrupted 4-hour window.
@@ -177,7 +185,7 @@ This is one of GigGuard's core business intelligence features. The AI model cont
 
 Why this matters: When rain is forecast, almost every delivery worker in that zone will purchase or renew insurance that week. Without a pricing adjustment, the company would pay out far more than it collected. The AI balances this by increasing premiums proportionally in high-risk regions before the event occurs, ensuring the company remains profitable across all regions.
 
-Example:
+**Example:**
 - Chennai forecast shows 80% probability of heavy rain next week.
 - The model detects that approximately 2,400 active workers in Chennai will likely trigger claims.
 - Regional exposure factor is raised for Chennai for that week only.
@@ -193,8 +201,8 @@ This adjustment is fully automated. No human intervention is needed. The model r
 
 GigGuard rewards consistency. Workers who pay regularly and enable autopay are lower operational cost and lower fraud risk, and the model reflects this:
 
-- Loyalty Discount: For every continuous week of uninterrupted premium payment, the worker earns a small discount accumulating up to a maximum of 15% off base premium. The discount resets if the worker misses a payment.
-- AutoPay Discount: Workers who enable automatic weekly deduction receive a flat 5% discount on their weekly premium. This also reduces payment failure risk for GigGuard.
+- **Loyalty Discount:** For every continuous week of uninterrupted premium payment, the worker earns a small discount accumulating up to a maximum of 15% off base premium. The discount resets if the worker misses a payment.
+- **AutoPay Discount:** Workers who enable automatic weekly deduction receive a flat 5% discount on their weekly premium. This also reduces payment failure risk for GigGuard.
 
 These discounts are automatically factored into the ML model output each week — workers see a lower premium over time simply by staying consistent.
 
@@ -215,23 +223,23 @@ Coverage Payout = Disrupted Hours x (Weekly Earnings Avg / Active Hours in Week)
 **Why 3.5%?**
 A coverage rate of 3.5% means a worker earning Rs. 2,000/week pays just Rs. 70 as their base premium — roughly Rs. 10/day, less than a cup of tea. Yet when a disruption strikes and 6 hours of work are lost, the payout can be Rs. 300-500. The worker gets back 4-7x what they paid that week. This rate is affordable for the worker while still allowing GigGuard to remain profitable through the regional exposure model and by pooling risk across thousands of workers in low-risk zones.
 
-Example (Typical Full-Time Rider — Single Platform):
+**Example — Typical Full-Time Rider (Single Platform):**
 - Kiran's 4-week average earnings on Swiggy: Rs. 2,000/week
-- Base coverage rate: 3.5% — Base Premium = Rs. 70
+- Base coverage rate: 3.5% → Base Premium = Rs. 70
 - Zone risk multiplier: 1.05 (moderate zone)
 - Weather forecast multiplier: 1.08 (mild rain chance next week)
 - Loyalty discount: 5% (5 weeks continuous payment)
 - AutoPay discount: 5% (enabled)
-- Final Premium = Rs. 70 x 1.05 x 1.08 x 0.95 x 0.95 = approximately Rs. 72/week
+- **Final Premium = Rs. 70 × 1.05 × 1.08 × 0.95 × 0.95 ≈ Rs. 72/week**
 
-Example (Multi-Platform Rider — Higher Earner):
+**Example — Multi-Platform Rider (Higher Earner):**
 - Ravi's 4-week average earnings across Zomato + Amazon Flex: Rs. 2,800/week
-- Base coverage rate: 3.5% — Base Premium = Rs. 98
+- Base coverage rate: 3.5% → Base Premium = Rs. 98
 - Zone risk multiplier: 1.05 (moderate zone, Chennai)
 - Weather forecast multiplier: 1.10 (moderate rain forecast next week)
 - Loyalty discount: 8% (8 weeks continuous payment)
 - AutoPay discount: 5% (enabled)
-- Final Premium = Rs. 98 x 1.05 x 1.10 x 0.92 x 0.95 = approximately Rs. 99/week
+- **Final Premium = Rs. 98 × 1.05 × 1.10 × 0.92 × 0.95 ≈ Rs. 99/week**
 
 ---
 
@@ -271,7 +279,7 @@ Parametric insurance means the event data triggers the claim — not a manual co
 | Trigger ID | Disruption Type | Data Source | Threshold | Payout Trigger |
 |---|---|---|---|---|
 | T-01 | Heavy Rainfall | OpenWeatherMap / IMD API | Rainfall > 64.5mm/24h (Red Alert) OR > 35.5mm/3h | Auto-claim for affected zone |
-| T-02 | Extreme Heat | OpenWeatherMap | Temperature > 45 degrees C AND Heat Index > 54 degrees C | Auto-claim if active in zone |
+| T-02 | Extreme Heat | OpenWeatherMap | Temperature > 45°C AND Heat Index > 54°C | Auto-claim if active in zone |
 | T-03 | Severe Air Pollution | CPCB AQI API / OpenAQ | AQI > 400 (Severe) AND official advisory issued | Auto-claim for GRAP-restricted zones |
 | T-04 | Flood / Waterlogging | OpenWeatherMap + Google Maps Traffic API | Zone tagged as flooded / road closures detected | Auto-claim for registered zone |
 | T-05 | Curfew / Section 144 | Government notification RSS / News API | Official order detected in registered zone | Auto-claim for disrupted window |
@@ -292,38 +300,40 @@ Every 15 minutes:
 
 ## AI/ML Integration
 
-### 1. Dynamic Premium Calculation (XGBoost)
+> **Phase note:** Models 1 and 2 below are designed and will be trained in Phase 2. Models 3–6 are planned for Phase 2–3. All architecture and feature decisions are finalised in Phase 1.
 
-- Model Type: Gradient Boosted Regression (XGBoost)
-- Training Data: Synthetic and historical weather events, IMD disruption records, simulated delivery platform earnings data
-- Features: Zone risk score, weather forecast, AQI forecast, regional exposure factor, combined earnings average across all platforms, claim history, loyalty weeks, autopay status, holiday calendar
-- Output: Weekly premium amount (Rs.) and recommended coverage tier
-- Retraining: Model retrained weekly with new disruption event outcomes and actual claim data
+### 1. Dynamic Premium Calculation (XGBoost) — *Planned: Phase 2*
 
-### 2. Regional Profit Protection Model (XGBoost + Time-Series Forecasting)
+- **Model Type:** Gradient Boosted Regression (XGBoost)
+- **Training Data:** Synthetic and historical weather events, IMD disruption records, simulated delivery platform earnings data
+- **Features:** Zone risk score, weather forecast, AQI forecast, regional exposure factor, combined earnings average across all platforms, claim history, loyalty weeks, autopay status, holiday calendar
+- **Output:** Weekly premium amount (Rs.) and recommended coverage tier
+- **Retraining:** Model retrained weekly with new disruption event outcomes and actual claim data
 
-- Model Type: XGBoost regressor combined with weather probability time-series forecasting
-- Purpose: Predict the expected claim payout volume for each city/region for the upcoming week, and compute the minimum premium required to cover expected payouts plus a target profit margin
-- How it works: Every Monday, the model ingests the 7-day weather probability forecast for each active region. It estimates the number of workers likely to claim, calculates expected total payout, and outputs the regional exposure factor — a multiplier applied only to that region's premium for that week
-- Output: Per-region premium multiplier for the upcoming week, automatically applied without human input
+### 2. Regional Profit Protection Model (XGBoost + Time-Series Forecasting) — *Planned: Phase 2*
 
-### 3. Fraud Detection Engine (Isolation Forest + Rule-Based Layer)
+- **Model Type:** XGBoost regressor combined with weather probability time-series forecasting
+- **Purpose:** Predict the expected claim payout volume for each city/region for the upcoming week, and compute the minimum premium required to cover expected payouts plus a target profit margin
+- **How it works:** Every Monday, the model ingests the 7-day weather probability forecast for each active region. It estimates the number of workers likely to claim, calculates expected total payout, and outputs the regional exposure factor — a multiplier applied only to that region's premium for that week
+- **Output:** Per-region premium multiplier for the upcoming week, automatically applied without human input
 
-- Model Type: Isolation Forest (unsupervised anomaly detection) combined with hard rule checks
-- Fraud Signals Detected:
+### 3. Fraud Detection Engine (Isolation Forest + Rule-Based Layer) — *Rule layer: Phase 2 | ML model: Phase 3*
+
+- **Model Type:** Isolation Forest (unsupervised anomaly detection) combined with hard rule checks
+- **Fraud Signals Detected:**
   - GPS location mismatch: worker not in claimed disruption zone at time of event
   - Delivery activity detected during claimed disruption window across any registered platform
   - Duplicate claim: same worker, same event, multiple submissions
   - Abnormal claim frequency relative to zone peers
   - GPS spoofing: sudden unrealistic location jumps detected
   - New registration fraud: worker registers and attempts to claim within the minimum eligibility window
-- Output: Fraud risk score from 0 to 1. Score above 0.75 flags for manual review. Score above 0.9 auto-rejects.
+- **Output:** Fraud risk score from 0 to 1. Score above 0.75 flags for manual review. Score above 0.9 auto-rejects.
 
-### 4. Minimum Eligibility Verification
+### 4. Minimum Eligibility Verification — *Implemented: Phase 1 (design) → Phase 2 (code)*
 
 A critical fraud prevention layer. A worker who registers knowing that heavy rain is forecast for next week, takes out insurance, files a claim, and disappears is a well-known adverse selection attack. GigGuard prevents this by enforcing a minimum verified work history before a worker is eligible to purchase insurance.
 
-The minimum eligibility threshold is set at 2 weeks of verified active delivery history on at least one registered platform. This threshold was chosen because:
+The minimum eligibility threshold is set at **2 weeks** of verified active delivery history on at least one registered platform. This threshold was chosen because:
 
 - 1 week is too short and still allows opportunistic rain-season registrations.
 - 3 weeks or more may exclude genuine new workers who need coverage quickly.
@@ -331,16 +341,16 @@ The minimum eligibility threshold is set at 2 weeks of verified active delivery 
 
 The model verifies this by checking the worker's account creation date and delivery activity logs on each registered platform via the background verification step during onboarding. If the worker does not meet the threshold, they are offered a provisional registration with insurance eligibility unlocked automatically once their 2-week verification window is complete.
 
-### 5. Risk Profiling (K-Means Clustering + Scoring)
+### 5. Risk Profiling (K-Means Clustering + Scoring) — *Planned: Phase 2*
 
-- Model Type: K-Means clustering for zone-level risk segmentation and logistic scoring for worker profile
-- Purpose: Assign each delivery zone a risk tier (Low / Medium / High / Extreme) based on historical disruption frequency, drainage quality, curfew history, and platform activity density
-- Worker-level: Individual risk score considering zone history, hours worked, multi-platform activity, account age, claim history, and loyalty weeks
+- **Model Type:** K-Means clustering for zone-level risk segmentation and logistic scoring for worker profile
+- **Purpose:** Assign each delivery zone a risk tier (Low / Medium / High / Extreme) based on historical disruption frequency, drainage quality, curfew history, and platform activity density
+- **Worker-level:** Individual risk score considering zone history, hours worked, multi-platform activity, account age, claim history, and loyalty weeks
 
-### 6. Predictive Analytics Dashboard (For Insurers)
+### 6. Predictive Analytics Dashboard (For Insurers) — *Planned: Phase 3*
 
-- Model: Time-series forecasting (Prophet / LSTM) to predict next week's likely claim volume by zone
-- Output: Insurer admin dashboard showing predicted loss ratio, zone-wise exposure heatmap, upcoming high-risk days, and premium adequacy indicators per region
+- **Model:** Time-series forecasting (Prophet / LSTM) to predict next week's likely claim volume by zone
+- **Output:** Insurer admin dashboard showing predicted loss ratio, zone-wise exposure heatmap, upcoming high-risk days, and premium adequacy indicators per region
 
 ---
 
@@ -348,8 +358,8 @@ The model verifies this by checking the worker's account creation date and deliv
 
 | Layer | Technology | Purpose |
 |---|---|---|
-| Web App | React (TypeScript) | Worker-facing web portal and insurer admin dashboard |
-| Mobile App | React Native | iOS and Android app for delivery partners |
+| Web App | React (TypeScript) | Insurer admin dashboard (web-first, desktop-optimised for operations teams) |
+| Mobile App | React Native | iOS and Android app for delivery partners — mobile-first because riders access the platform entirely on their phones, UPI payments are mobile-native, and push notifications for claim payouts require a native app |
 | Backend API | Node.js + Express + TypeScript | REST API server, business logic, policy engine |
 | AI/ML Services | Python (FastAPI) | ML model serving — premium calculation, fraud detection, risk profiling, regional exposure model |
 | ML Libraries | Scikit-learn, XGBoost, Pandas, NumPy, Prophet | Model training and inference |
@@ -361,6 +371,10 @@ The model verifies this by checking the worker's account creation date and deliv
 | DevOps | Docker, GitHub Actions | Containerisation, CI/CD |
 | Cloud | AWS (EC2, RDS, S3, Lambda) | Hosting, storage, serverless trigger workers |
 
+### Platform Choice Justification: Mobile (React Native) for Workers, Web (React) for Insurers
+
+Delivery partners in India are a mobile-first population — they access everything through their smartphones and are unlikely to open a laptop to check their insurance status. React Native allows us to ship a single codebase for both iOS and Android while supporting UPI deep-links, GPS access, and push notifications for instant payout alerts — all critical to the GigGuard worker experience. The insurer admin portal, by contrast, is used by operations teams on desktop browsers who need data-dense dashboards, so a React web app is the right fit there.
+
 ---
 
 ## Architecture Diagram
@@ -369,34 +383,34 @@ The architecture below shows the complete system design for GigGuard, covering t
 
 ![GigGuard Architecture Diagram](./architecture_diagram.png)
 
-Key Architectural Components:
+**Key Architectural Components:**
 
-- Delivery Partner App (React Native): Onboarding, multi-platform registration, policy review, premium payment, claim status, payout notifications.
-- Web Portal (React): Insurer admin dashboard — policy management, fraud review, analytics, zone risk maps, regional exposure view.
-- Backend (Node.js + Express): Core business logic — registration, eligibility verification, policy engine, premium computation orchestration, claim management.
-- AI/ML Service (Python + FastAPI): Separate microservice for ML inference — premium model, regional exposure model, fraud model, eligibility checker, risk profiling. Consumed by the backend via internal REST calls.
-- Parametric Trigger Worker (Python + Redis Queue): Runs every 15 minutes, polls all external APIs, evaluates thresholds, publishes disruption events to the claim engine.
-- External Integrations: Weather APIs (OpenWeatherMap / IMD), AQI APIs (CPCB / OpenAQ), Platform APIs (simulated Zomato/Swiggy/Amazon data), Government advisory feeds.
-- AI Data Store: Historical disruption data, zone risk scores, weather patterns, regional claim history — feeds the ML models for training and inference.
+- **Delivery Partner App (React Native):** Onboarding, multi-platform registration, policy review, premium payment, claim status, payout notifications.
+- **Web Portal (React):** Insurer admin dashboard — policy management, fraud review, analytics, zone risk maps, regional exposure view.
+- **Backend (Node.js + Express):** Core business logic — registration, eligibility verification, policy engine, premium computation orchestration, claim management.
+- **AI/ML Service (Python + FastAPI):** Separate microservice for ML inference — premium model, regional exposure model, fraud model, eligibility checker, risk profiling. Consumed by the backend via internal REST calls.
+- **Parametric Trigger Worker (Python + Redis Queue):** Runs every 15 minutes, polls all external APIs, evaluates thresholds, publishes disruption events to the claim engine.
+- **External Integrations:** Weather APIs (OpenWeatherMap / IMD), AQI APIs (CPCB / OpenAQ), Platform APIs (simulated Zomato/Swiggy/Amazon data), Government advisory feeds.
+- **AI Data Store:** Historical disruption data, zone risk scores, weather patterns, regional claim history — feeds the ML models for training and inference.
 
 ---
 
 ## Development Plan
 
-### Phase 1 — Ideation and Foundation [March 4-20] (Seed Phase)
+### Phase 1 — Ideation and Foundation [March 4–20] (Seed Phase)
 
 Theme: "Ideate and Know Your Delivery Worker"
 
-| Week | Tasks |
+| Week | Tasks Completed |
 |---|---|
-| Week 1 | Finalise persona (Food Delivery — Zomato/Swiggy). Define parametric triggers. Design data models (worker, policy, claim, payout, multi-platform profile). Set up project repo and CI/CD pipeline. |
-| Week 2 | Build registration flow with multi-platform selection (web and app). Set up backend scaffolding (Node/Express/TypeScript). Integrate OpenWeatherMap API. Design eligibility verification flow. Build wireframes for worker app and admin dashboard. Produce architecture diagram. |
+| Week 1 | Finalised persona (Food Delivery — Zomato/Swiggy with multi-platform support). Defined all 5 parametric triggers with data sources and thresholds. Designed full data models (worker, policy, claim, payout, multi-platform profile). Set up GitHub repository and CI/CD pipeline via GitHub Actions. Defined system architecture and component responsibilities. |
+| Week 2 | Designed wireframes for worker mobile app and insurer admin dashboard. Designed eligibility verification flow and minimum eligibility logic. Defined ML feature set for premium model (10 features, documented above). Produced architecture diagram. Integrated OpenWeatherMap API (proof-of-concept call). Wrote this README. Recorded 2-minute strategy video. |
 
-Deliverable: README (this document) + Git repository + 2-minute strategy video.
+**Deliverable:** README (this document) + Git repository + 2-minute strategy video.
 
 ---
 
-### Phase 2 — Automation and Protection [March 21 - April 4] (Scale Phase)
+### Phase 2 — Automation and Protection [March 21 – April 4] (Scale Phase)
 
 Theme: "Protect Your Worker"
 
@@ -405,11 +419,11 @@ Theme: "Protect Your Worker"
 | Week 3 | Build Registration Process with multi-platform background verification and eligibility check. Build Insurance Policy Management module. Integrate simulated platform APIs (Zomato/Swiggy/Amazon worker data). Train initial XGBoost premium model on synthetic data including loyalty, autopay, and regional exposure features. |
 | Week 4 | Build Dynamic Premium Calculation API (Python ML service) including regional profit protection model. Build Claims Management module. Implement triggers T-01 to T-05. Build basic fraud detection rules including new-registration fraud check. Connect React Native app to backend APIs. |
 
-Deliverable: Executable source code + 2-minute demo video showcasing Registration, Policy Management, Dynamic Premium Calculation, and Claims Management.
+**Deliverable:** Executable source code + 2-minute demo video showcasing Registration, Policy Management, Dynamic Premium Calculation, and Claims Management.
 
 ---
 
-### Phase 3 — Scale and Optimise [April 5-17] (Soar Phase)
+### Phase 3 — Scale and Optimise [April 5–17] (Soar Phase)
 
 Theme: "Perfect for Your Worker"
 
@@ -418,17 +432,17 @@ Theme: "Perfect for Your Worker"
 | Week 5 | Upgrade fraud detection to Isolation Forest ML model. Add GPS spoofing detection and multi-platform inactivity cross-check. Integrate Razorpay test mode for simulated instant payouts. Build Worker Dashboard (earnings protected, active coverage, claim history, loyalty discount tracker). |
 | Week 6 | Build Insurer Admin Dashboard (loss ratios, predictive analytics, regional exposure heatmap, premium adequacy indicators). Polish UX across web and mobile. Stress-test parametric trigger pipeline. Record 5-minute final demo video. Prepare final pitch deck (PDF). |
 
-Deliverable: Advanced fraud detection + instant payout simulation + intelligent dashboards + 5-minute demo video + final pitch deck PDF.
+**Deliverable:** Advanced fraud detection + instant payout simulation + intelligent dashboards + 5-minute demo video + final pitch deck PDF.
 
 ---
 
 ## Critical Constraints (Per Problem Statement)
 
-- Coverage Scope: Income loss ONLY — no health, life, accident, or vehicle repair coverage.
-- Weekly Pricing: All premiums and financial models are structured on a weekly basis.
-- Persona: Food delivery partners (Zomato / Swiggy / Amazon) with multi-platform support.
-- Parametric Only: Claims triggered by external data thresholds — not by self-reported incidents.
-- Minimum Eligibility: Workers must have a verified 2-week active delivery history before insurance is activated.
+- **Coverage Scope:** Income loss ONLY — no health, life, accident, or vehicle repair coverage.
+- **Weekly Pricing:** All premiums and financial models are structured on a weekly basis.
+- **Persona:** Food delivery partners (Zomato / Swiggy / Amazon) with multi-platform support.
+- **Parametric Only:** Claims triggered by external data thresholds — not by self-reported incidents.
+- **Minimum Eligibility:** Workers must have a verified 2-week active delivery history before insurance is activated.
 
 ---
 
