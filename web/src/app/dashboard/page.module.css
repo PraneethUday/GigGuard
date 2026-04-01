@@ -13,8 +13,10 @@
 
 .pageRoot {
   min-height: 100vh;
-  background: radial-gradient(circle at 0% 0%, var(--gg-bg-1), transparent 42%),
-    radial-gradient(circle at 100% 100%, var(--gg-bg-2), transparent 48%), #f8fafc;
+  background:
+    radial-gradient(circle at 0% 0%, var(--gg-bg-1), transparent 42%),
+    radial-gradient(circle at 100% 100%, var(--gg-bg-2), transparent 48%),
+    #f8fafc;
   color: var(--gg-text);
   font-family: Manrope, "Avenir Next", "Segoe UI", sans-serif;
 }
