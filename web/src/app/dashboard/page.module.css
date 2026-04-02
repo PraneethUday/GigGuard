@@ -448,6 +448,12 @@
   color: #0f172a;
 }
 
+.profileRowMono {
+  font-family: monospace;
+  font-size: 0.85em;
+  word-break: break-all;
+}
+
 @media (max-width: 1024px) {
   .grid4 {
     grid-template-columns: repeat(2, 1fr);

@@ -36,9 +36,10 @@ export async function PATCH(
 ) {
   try {
     const { workerId } = await params;
-    const { action } = await req.json();
+    const body = await req.json();
+    const { action, tier } = body;
 
-    if (!workerId || !action || !["approve", "reject"].includes(action)) {
+    if (!workerId) {
       return NextResponse.json({ error: "Invalid request." }, { status: 400 });
     }
 
@@ -46,7 +47,7 @@ export async function PATCH(
 
     const { data: worker, error: fetchError } = await db
       .from("registered_workers")
-      .select("id, delivery_id, platforms, verification_status")
+      .select("id, delivery_id, platforms, verification_status, tier")
       .eq("id", workerId)
       .limit(1)
       .maybeSingle();
@@ -61,28 +62,39 @@ export async function PATCH(
       worker.platforms || [],
     );
 
-    if (action === "approve" && !verification.auto_verified) {
+    const updates: Record<string, string> = {};
+
+    // Handle status change - admin can approve or reject regardless of auto_verified
+    if (action === "approve") {
+      updates.verification_status = "verified";
+    } else if (action === "reject") {
+      updates.verification_status = "rejected";
+    } else if (action === "pending") {
+      updates.verification_status = "pending";
+    }
+
+    // Handle tier change
+    if (tier && ["basic", "standard", "pro"].includes(tier)) {
+      updates.tier = tier;
+    }
+
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json(
-        {
-          error:
-            "Cannot approve: worker not found in selected platform records.",
-        },
+        { error: "No valid action or tier change provided." },
         { status: 400 },
       );
     }
 
-    const nextStatus = action === "approve" ? "verified" : "rejected";
-
     const { data: updated, error: updateError } = await db
       .from("registered_workers")
-      .update({ verification_status: nextStatus })
+      .update(updates)
       .eq("id", workerId)
-      .select("id, verification_status")
+      .select("id, verification_status, tier")
       .single();
 
     if (updateError) {
       return NextResponse.json(
-        { error: "Failed to update worker status." },
+        { error: "Failed to update worker." },
         { status: 500 },
       );
     }

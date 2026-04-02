@@ -4,20 +4,13 @@ import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"worker" | "admin">("worker");
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const adminUrl =
-    process.env.NEXT_PUBLIC_ADMIN_URL || "http://localhost:3001/admin";
 
   const handleLogin = async () => {
     if (!form.email || !form.password) {
       setError("Please enter your email and password.");
-      return;
-    }
-    if (tab === "admin") {
-      window.location.href = adminUrl;
       return;
     }
     setLoading(true);
@@ -99,42 +92,6 @@ export default function LoginPage() {
             border: "1px solid #e2e8f0",
           }}
         >
-          {/* Tabs */}
-          <div
-            style={{
-              display: "flex",
-              background: "#f1f5f9",
-              borderRadius: 10,
-              padding: 4,
-              marginBottom: 24,
-            }}
-          >
-            {(["worker", "admin"] as const).map((t) => (
-              <button
-                key={t}
-                onClick={() => {
-                  setTab(t);
-                  setError("");
-                }}
-                style={{
-                  flex: 1,
-                  padding: "10px 0",
-                  borderRadius: 8,
-                  fontSize: 13,
-                  fontWeight: 600,
-                  border: "none",
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                  background: tab === t ? "#fff" : "transparent",
-                  color: tab === t ? "#0f172a" : "#64748b",
-                  boxShadow: tab === t ? "0 1px 2px rgba(0,0,0,0.08)" : "none",
-                }}
-              >
-                {t === "worker" ? "Delivery Partner" : "Insurer Admin"}
-              </button>
-            ))}
-          </div>
-
           {/* Error */}
           {error && (
             <div
@@ -169,9 +126,7 @@ export default function LoginPage() {
               </label>
               <input
                 type="email"
-                placeholder={
-                  tab === "worker" ? "you@example.com" : "admin@gigguard.in"
-                }
+                placeholder="you@example.com"
                 value={form.email}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, email: e.target.value }))

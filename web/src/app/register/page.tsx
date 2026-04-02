@@ -41,6 +41,8 @@ export default function RegisterPage() {
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [verifying, setVerifying] = useState(false)
+  const [verifyResult, setVerifyResult] = useState<{verified: boolean; matched_platforms: string[]} | null>(null)
 
   const [form, setForm] = useState<Form>({
     platforms: [], name: '', age: '', phone: '', email: '',
@@ -87,6 +89,33 @@ export default function RegisterPage() {
       setError('Something went wrong. Please try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleVerifyId = async () => {
+    if (!form.deliveryId || form.platforms.length === 0) {
+      setError('Enter your Delivery Partner ID and select at least one platform first.')
+      return
+    }
+    setVerifying(true)
+    setError('')
+    setVerifyResult(null)
+    try {
+      const res = await fetch('/api/verify-id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ deliveryId: form.deliveryId, platforms: form.platforms }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error || 'Verification failed.'); return }
+      setVerifyResult(data)
+      if (!data.verified) {
+        setError('Your Delivery Partner ID was not found in the selected platform databases. Please check your ID and try again. You can still register, but admin approval will require manual verification.')
+      }
+    } catch {
+      setError('Verification service unavailable. You can still proceed with registration.')
+    } finally {
+      setVerifying(false)
     }
   }
 
@@ -225,8 +254,33 @@ export default function RegisterPage() {
                 </div>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <label style={labelStyle}>Primary Delivery Partner ID</label>
-                  <input style={inputStyle} placeholder="Your ID from the platform app" value={form.deliveryId} onChange={e => update('deliveryId', e.target.value)} {...focusHandler} />
-                  <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Used to verify your worker status on the selected platforms.</p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <input style={{ ...inputStyle, flex: 1 }} placeholder="Your ID from the platform app" value={form.deliveryId} onChange={e => { update('deliveryId', e.target.value); setVerifyResult(null) }} {...focusHandler} />
+                    <button
+                      type="button"
+                      onClick={handleVerifyId}
+                      disabled={verifying || !form.deliveryId}
+                      style={{
+                        height: 44, padding: '0 18px', background: '#0f172a', color: '#fff',
+                        border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                        cursor: verifying || !form.deliveryId ? 'not-allowed' : 'pointer',
+                        opacity: verifying || !form.deliveryId ? 0.5 : 1, whiteSpace: 'nowrap',
+                      }}
+                    >
+                      {verifying ? 'Verifying...' : 'Verify ID'}
+                    </button>
+                  </div>
+                  <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Click &quot;Verify ID&quot; to check if your partner ID exists in the selected platform databases.</p>
+                  {verifyResult && verifyResult.verified && (
+                    <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', marginTop: 8, fontSize: 13, color: '#16a34a', fontWeight: 500 }}>
+                      ID verified on: {verifyResult.matched_platforms.map(id => PLATFORMS.find(p => p.id === id)?.name || id).join(', ')}
+                    </div>
+                  )}
+                  {verifyResult && !verifyResult.verified && (
+                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 8, padding: '10px 14px', marginTop: 8, fontSize: 13, color: '#dc2626', fontWeight: 500 }}>
+                      ID not found in any selected platform database. You can still register, but approval will require manual verification by admin.
+                    </div>
+                  )}
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>

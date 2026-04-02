@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# ML model artifacts (retrained on server, not committed)
+ml/saved_models/*.joblib
+ml/saved_models/*.json
+
+# Build / dist
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/

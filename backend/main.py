@@ -9,7 +9,9 @@ Exposes endpoints for:
 """
 
 import asyncio
+import io
 import logging
+import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Query
@@ -17,7 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from db import fetch_workers, fetch_worker_history, supabase
-from scheduler import tick, INTERVAL_SECONDS
+from scheduler import tick, run_retrain, INTERVAL_SECONDS
 from ml.weather import fetch_weather, fetch_all_cities
 from ml.premium_model import (
     build_features_from_history,
@@ -25,6 +27,7 @@ from ml.premium_model import (
     load_model,
     load_metadata,
     compute_target_premium,
+    clamp_premium,
     TIER_CONFIG,
 )
 
@@ -33,6 +36,53 @@ logging.basicConfig(
     format="%(asctime)s  [%(levelname)s]  %(message)s",
 )
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Retrain state — shared between the background task and the logs endpoint
+# ---------------------------------------------------------------------------
+retrain_state: dict = {
+    "running": False,
+    "completed": False,
+    "error": None,
+    "logs": [],
+}
+
+
+class _LogCapture(io.TextIOBase):
+    """Tee: write to both a list and the original stdout."""
+
+    def __init__(self, log_list: list, original: object) -> None:
+        self._log_list = log_list
+        self._original = original
+
+    def write(self, s: str) -> int:
+        stripped = s.rstrip("\n")
+        if stripped:
+            self._log_list.append(stripped)
+        self._original.write(s)  # type: ignore[attr-defined]
+        return len(s)
+
+    def flush(self) -> None:
+        self._original.flush()  # type: ignore[attr-defined]
+
+
+async def _retrain_with_logs() -> None:
+    retrain_state["running"] = True
+    retrain_state["completed"] = False
+    retrain_state["error"] = None
+    retrain_state["logs"] = []
+
+    original_stdout = sys.stdout
+    sys.stdout = _LogCapture(retrain_state["logs"], original_stdout)
+    try:
+        await run_retrain()
+        retrain_state["completed"] = True
+    except Exception as exc:  # pylint: disable=broad-except
+        retrain_state["error"] = str(exc)
+        retrain_state["logs"].append(f"[retrain] ERROR: {exc}")
+    finally:
+        sys.stdout = original_stdout
+        retrain_state["running"] = False
 
 
 # ---------------------------------------------------------------------------
@@ -209,12 +259,13 @@ async def predict_worker_premium(req: PremiumRequest):
     if model:
         result = predict_premium(model, features, req.tier)
     else:
-        premium = compute_target_premium(features, req.tier)
+        raw_premium = compute_target_premium(features, req.tier)
+        premium = clamp_premium(raw_premium, req.tier)
         cfg = TIER_CONFIG.get(req.tier, TIER_CONFIG["standard"])
         result = {
             "weekly_premium": premium,
             "weekly_premium_autopay": round(premium * 0.95, 2),
-            "raw_prediction": premium,
+            "raw_prediction": round(raw_premium, 2),
             "tier": req.tier,
             "max_payout": cfg["max_payout"],
             "weather_risk": features.get("weather_risk", 0),
@@ -286,3 +337,133 @@ async def model_status():
         "metadata": meta,
         "tiers": TIER_CONFIG,
     }
+
+
+@app.post("/api/model/retrain")
+async def trigger_retrain():
+    """Start model retraining as a background task and return immediately."""
+    if retrain_state["running"]:
+        return {"status": "already_running", "message": "Retrain is already in progress."}
+    asyncio.create_task(_retrain_with_logs())
+    return {"status": "started", "message": "Retrain started in background."}
+
+
+@app.get("/api/model/retrain/logs")
+async def get_retrain_logs():
+    """Return current retrain progress: running flag, logs, error, completed."""
+    meta = load_metadata() if retrain_state["completed"] else None
+    return {
+        "running": retrain_state["running"],
+        "completed": retrain_state["completed"],
+        "error": retrain_state["error"],
+        "logs": retrain_state["logs"],
+        "metadata": meta,
+    }
+
+
+class AdjustIncomeRequest(BaseModel):
+    platform: str | None = None
+    worker_id: str | None = None
+    earnings_multiplier: float = 1.0
+    deliveries_multiplier: float = 1.0
+
+
+@app.post("/api/admin/adjust-income")
+async def adjust_income(req: AdjustIncomeRequest):
+    """Adjust worker income data by multiplier for testing the ML model.
+
+    This modifies TODAY's data for the specified platform or worker,
+    letting the admin see how the model responds to different income levels.
+    """
+    from datetime import date as date_type
+    today = date_type.today().isoformat()
+
+    tables = []
+    if req.platform:
+        table_name = f"{req.platform}_workers"
+        if table_name in [
+            "swiggy_workers", "zomato_workers", "amazon_flex_workers",
+            "blinkit_workers", "zepto_workers", "meesho_workers",
+            "porter_workers", "dunzo_workers",
+        ]:
+            tables = [table_name]
+    else:
+        from db import PLATFORM_TABLES
+        tables = PLATFORM_TABLES
+
+    updated_count = 0
+    for table in tables:
+        try:
+            query = supabase.table(table).select("id, earnings, deliveries").eq("date", today)
+            if req.worker_id:
+                query = query.eq("worker_id", req.worker_id)
+            resp = query.limit(500).execute()
+
+            for row in resp.data:
+                new_earnings = round(row["earnings"] * req.earnings_multiplier, 2)
+                new_deliveries = max(1, int(row["deliveries"] * req.deliveries_multiplier))
+                supabase.table(table).update({
+                    "earnings": new_earnings,
+                    "deliveries": new_deliveries,
+                }).eq("id", row["id"]).execute()
+                updated_count += 1
+        except Exception as e:
+            logger.error(f"Error adjusting {table}: {e}")
+
+    return {
+        "status": "ok",
+        "updated_rows": updated_count,
+        "earnings_multiplier": req.earnings_multiplier,
+        "deliveries_multiplier": req.deliveries_multiplier,
+    }
+
+
+@app.get("/api/admin/data-summary")
+async def data_summary():
+    """Get summary statistics of current worker data for the control center."""
+    from db import PLATFORM_TABLES
+    from datetime import date as date_type
+    today = date_type.today().isoformat()
+
+    platform_stats = []
+    for table in PLATFORM_TABLES:
+        try:
+            resp = (
+                supabase.table(table)
+                .select("earnings, deliveries, active_hours, rating")
+                .eq("date", today)
+                .limit(500)
+                .execute()
+            )
+            rows = resp.data
+            if rows:
+                earnings = [r["earnings"] for r in rows]
+                deliveries = [r["deliveries"] for r in rows]
+                platform_stats.append({
+                    "platform": table.replace("_workers", ""),
+                    "worker_count": len(rows),
+                    "avg_earnings": round(sum(earnings) / len(earnings), 2),
+                    "min_earnings": round(min(earnings), 2),
+                    "max_earnings": round(max(earnings), 2),
+                    "avg_deliveries": round(sum(deliveries) / len(deliveries), 1),
+                    "total_earnings": round(sum(earnings), 2),
+                })
+        except Exception:
+            pass
+
+    return {
+        "date": today,
+        "platforms": platform_stats,
+        "total_workers": sum(p["worker_count"] for p in platform_stats),
+        "overall_avg_earnings": round(
+            sum(p["avg_earnings"] * p["worker_count"] for p in platform_stats) /
+            max(1, sum(p["worker_count"] for p in platform_stats)), 2
+        ) if platform_stats else 0,
+    }
+
+
+@app.post("/api/admin/generate-data")
+async def trigger_data_generation():
+    """Manually trigger one cycle of data generation."""
+    await tick()
+    return {"status": "ok", "message": "Data generation cycle completed."}

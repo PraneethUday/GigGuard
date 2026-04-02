@@ -30,6 +30,7 @@ from ml.premium_model import (
     save_model,
     load_metadata,
     FEATURE_COLS,
+    MODEL_DIR,
 )
 
 
@@ -177,6 +178,4 @@ def retrain():
 
 
 if __name__ == "__main__":
-    from pathlib import Path
-    MODEL_DIR = Path(__file__).parent / "saved_models"
     retrain()

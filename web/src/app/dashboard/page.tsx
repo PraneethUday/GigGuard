@@ -539,6 +539,8 @@ export default function DashboardPage() {
                     <ProfileRow label="Phone" value={user.phone || "-"} />
                     <ProfileRow label="City" value={user.city || "-"} />
                     <ProfileRow label="Area" value={user.area || "-"} />
+                    <ProfileRow label="Account UUID" value={user.id} mono />
+                    <ProfileRow label="Delivery Partner ID" value={user.delivery_id || "-"} mono />
                   </div>
                   <div className={styles.panel}>
                     <h3 className={styles.panelTitle}>Insurance details</h3>
@@ -674,11 +676,11 @@ function MetricCard({
   );
 }
 
-function ProfileRow({ label, value }: { label: string; value: string }) {
+function ProfileRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
   return (
     <div className={styles.profileRow}>
       <span>{label}</span>
-      <strong>{value}</strong>
+      <strong className={mono ? styles.profileRowMono : undefined}>{value}</strong>
     </div>
   );
 }
