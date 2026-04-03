@@ -29,10 +29,11 @@ MODEL_PATH = MODEL_DIR / "premium_model.joblib"
 METADATA_PATH = MODEL_DIR / "model_metadata.json"
 
 # Premium config per tier
+# Rate is applied to weekly_earnings_est; min/max are the allowed output bounds
 TIER_CONFIG = {
-    "basic":    {"rate": 0.025, "min": 20,  "max": 40,  "max_payout": 500},
-    "standard": {"rate": 0.035, "min": 40,  "max": 80,  "max_payout": 1200},
-    "pro":      {"rate": 0.045, "min": 80,  "max": 130, "max_payout": 2500},
+    "basic":    {"rate": 0.015, "min": 10,  "max": 60,  "max_payout": 500},
+    "standard": {"rate": 0.025, "min": 20,  "max": 120, "max_payout": 1200},
+    "pro":      {"rate": 0.035, "min": 40,  "max": 200, "max_payout": 2500},
 }
 
 # City risk weights (base — overridden by real weather data during prediction)
@@ -172,18 +173,42 @@ FEATURE_COLS = list(_empty_features().keys())
 def compute_target_premium(features: dict, tier: str = "standard") -> float:
     """Compute the 'true' premium label for training data.
 
-    Formula: base_rate% * weekly_earnings * (1 + weather_risk) * city_risk
-    Clamped to tier min/max bounds.
+    Formula accounts for earnings, consistency, weather risk, city risk,
+    and efficiency — producing varied targets across workers.
+    The result is NOT clamped during training so the model learns real variance.
+    Clamping is only applied at prediction/serving time.
     """
     cfg = TIER_CONFIG.get(tier, TIER_CONFIG["standard"])
     weekly = features["weekly_earnings_est"]
 
     base = weekly * cfg["rate"]
+
+    # Weather risk: higher risk = higher premium (up to 1.5x)
     risk_mult = 1.0 + features["weather_risk"] * 0.5
+
+    # City multiplier
     city_mult = features["city_risk"]
 
-    premium = base * risk_mult * city_mult
+    # Consistency factor: inconsistent earners pay more (CV > 0.3 is high variance)
+    cv = features.get("earnings_cv", 0)
+    consistency_mult = 1.0 + min(cv, 0.5) * 0.4  # up to 1.2x for highly variable
 
+    # Efficiency factor: less efficient workers are riskier
+    earn_per_hour = features.get("earn_per_hour", 100)
+    efficiency_factor = max(0.8, min(1.2, 1.0 - (earn_per_hour - 100) / 500))
+
+    # Activity factor: fewer active days = higher premium (less data = more risk)
+    days_active = features.get("total_days_active", 7)
+    activity_mult = max(0.9, min(1.3, 1.0 + (7 - min(days_active, 7)) / 14))
+
+    premium = base * risk_mult * city_mult * consistency_mult * efficiency_factor * activity_mult
+
+    return round(premium, 2)
+
+
+def clamp_premium(premium: float, tier: str = "standard") -> float:
+    """Clamp a raw premium to tier bounds. Used only at serving time."""
+    cfg = TIER_CONFIG.get(tier, TIER_CONFIG["standard"])
     return round(max(cfg["min"], min(cfg["max"], premium)), 2)
 
 
@@ -288,7 +313,7 @@ def predict_premium(
 ) -> dict:
     """Predict weekly premium for a single worker.
 
-    Returns dict with predicted premium (clamped to tier bounds),
+    Returns dict with predicted premium (clamped to tier bounds at serving time),
     plus breakdown info.
     """
     cfg = TIER_CONFIG.get(tier, TIER_CONFIG["standard"])
@@ -296,8 +321,8 @@ def predict_premium(
     X = pd.DataFrame([features], columns=FEATURE_COLS)
     raw_pred = float(model.predict(X)[0])
 
-    # Clamp to tier bounds
-    premium = round(max(cfg["min"], min(cfg["max"], raw_pred)), 2)
+    # Clamp to tier bounds only at serving time
+    premium = clamp_premium(raw_pred, tier)
 
     # Discount: autopay 5%
     premium_with_autopay = round(premium * 0.95, 2)
