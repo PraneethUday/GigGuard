@@ -1,0 +1,55 @@
+{
+  "model_name": "GigGuard Premium Calculator",
+  "model_type": "XGBoostRegressor",
+  "version": "1.0.0",
+  "feature_columns": [
+    "zone_risk_score",
+    "rain_forecast_prob_7d",
+    "aqi_forecast_7d",
+    "weekly_earnings_avg",
+    "regional_exposure_factor",
+    "loyalty_weeks_at_purchase",
+    "autopay_enabled",
+    "multi_platform_score",
+    "n_platforms",
+    "public_holiday_flag",
+    "log_earnings",
+    "risk_weather_interaction",
+    "aqi_normalized",
+    "loyalty_tier"
+  ],
+  "target": "final_weekly_premium",
+  "best_iteration": 499,
+  "val_metrics": {
+    "rmse": 1.305,
+    "mae": 0.8208,
+    "r2": 0.9994,
+    "mape": 0.7494
+  },
+  "test_metrics": {
+    "rmse": 1.3648,
+    "mae": 0.8319,
+    "r2": 0.9993,
+    "mape": 0.7653
+  },
+  "cv_rmse_mean": 3.0919,
+  "cv_rmse_std": 1.9421,
+  "baseline_rmse": 52.0505,
+  "baseline_mae": 45.3961,
+  "input_example": {
+    "zone_risk_score": 0.42,
+    "rain_forecast_prob_7d": 0.35,
+    "aqi_forecast_7d": 120.0,
+    "weekly_earnings_avg": 2000.0,
+    "regional_exposure_factor": 1.15,
+    "loyalty_weeks_at_purchase": 6,
+    "autopay_enabled": 1,
+    "multi_platform_score": 0.4,
+    "n_platforms": 2,
+    "public_holiday_flag": 0,
+    "log_earnings": 7.601,
+    "risk_weather_interaction": 0.147,
+    "aqi_normalized": 0.24,
+    "loyalty_tier": 2
+  }
+}

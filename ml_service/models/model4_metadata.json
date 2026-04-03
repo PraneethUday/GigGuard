@@ -1,0 +1,66 @@
+{
+  "model_name": "GigGuard Risk Profiling",
+  "version": "1.0.0",
+  "k": 4,
+  "zone_features": [
+    "zone_risk_score",
+    "waterlogging_risk_score",
+    "hist_claim_rate",
+    "hist_disruption_freq_per_year",
+    "avg_aqi_baseline",
+    "drainage_score",
+    "curfew_history_count",
+    "platform_activity_density"
+  ],
+  "worker_features": [
+    "zone_risk_score",
+    "waterlogging_risk_score",
+    "weekly_earnings_avg",
+    "hours_per_day",
+    "active_days_per_week",
+    "n_platforms",
+    "loyalty_weeks",
+    "autopay_enabled",
+    "multi_platform_score",
+    "hist_claim_count",
+    "weeks_active",
+    "log_earnings",
+    "claim_rate_personal",
+    "weekly_active_hours",
+    "earnings_per_hour"
+  ],
+  "zone_silhouette": 0.2598,
+  "worker_silhouette": 0.1036,
+  "zone_inertia": 490.08,
+  "worker_inertia": 53936.48,
+  "elbow_inertias": {
+    "2": 737.45,
+    "3": 583.92,
+    "4": 490.08,
+    "5": 426.91,
+    "6": 387.74,
+    "7": 360.37,
+    "8": 325.94
+  },
+  "silhouette_scores": {
+    "2": 0.2405,
+    "3": 0.236,
+    "4": 0.2598,
+    "5": 0.244,
+    "6": 0.2526,
+    "7": 0.2381,
+    "8": 0.2487
+  },
+  "zone_tier_mapping": {
+    "3": "Low",
+    "0": "Medium",
+    "2": "High",
+    "1": "Extreme"
+  },
+  "worker_segment_labels": {
+    "0": "Basic Shield",
+    "1": "Standard Guard",
+    "3": "Pro Protect",
+    "2": "Super Active"
+  }
+}

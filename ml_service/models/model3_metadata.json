@@ -1,0 +1,54 @@
+{
+  "model_name": "GigGuard Fraud Detection Engine",
+  "version": "1.0.0",
+  "feature_columns": [
+    "gps_violation",
+    "gps_spoof_detected",
+    "delivery_activity_detected",
+    "duplicate_claim",
+    "new_registration_fraud",
+    "abnormal_claim_freq",
+    "n_fraud_signals",
+    "payout_premium_ratio",
+    "earnings_normalized",
+    "disruption_severity",
+    "rainfall_normalized",
+    "aqi_normalized",
+    "platforms_norm",
+    "fraud_risk_score"
+  ],
+  "rule_weight": 0.6,
+  "iso_weight": 0.4,
+  "thresholds": {
+    "auto_reject": 0.9,
+    "manual_review": 0.75,
+    "auto_approve": 0.75
+  },
+  "contamination": 0.08,
+  "performance": {
+    "rule_based": {
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.8571
+    },
+    "isolation_forest": {
+      "precision": 0.8704,
+      "recall": 0.8812,
+      "f1": 0.8758
+    },
+    "combined": {
+      "precision": 1.0,
+      "recall": 0.7875,
+      "f1": 0.8811,
+      "roc_auc": 0.9413
+    }
+  },
+  "confusion_matrix": {
+    "TP": 126,
+    "FP": 0,
+    "TN": 1842,
+    "FN": 34
+  },
+  "fraud_catch_rate": 0.7875,
+  "false_positive_rate": 0.0
+}

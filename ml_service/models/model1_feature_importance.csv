@@ -1,0 +1,15 @@
+feature,importance
+log_earnings,0.4770823
+weekly_earnings_avg,0.3715334
+regional_exposure_factor,0.071032494
+loyalty_tier,0.017492514
+n_platforms,0.0153740775
+loyalty_weeks_at_purchase,0.011541946
+risk_weather_interaction,0.009720769
+autopay_enabled,0.007816043
+aqi_normalized,0.0076250914
+rain_forecast_prob_7d,0.004997659
+aqi_forecast_7d,0.0037889413
+zone_risk_score,0.0017423355
+multi_platform_score,0.00017706279
+public_holiday_flag,7.5247975e-05

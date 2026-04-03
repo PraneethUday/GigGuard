@@ -1,0 +1,128 @@
+{
+  "model1": {
+    "features": [
+      "zone_risk_score",
+      "rain_forecast_prob_7d",
+      "aqi_forecast_7d",
+      "weekly_earnings_avg",
+      "regional_exposure_factor",
+      "loyalty_weeks_at_purchase",
+      "autopay_enabled",
+      "multi_platform_score",
+      "n_platforms",
+      "public_holiday_flag",
+      "log_earnings",
+      "risk_weather_interaction",
+      "aqi_normalized",
+      "loyalty_tier"
+    ],
+    "target": "final_weekly_premium",
+    "n_rows": 71323,
+    "train": 49926,
+    "val": 10698,
+    "test": 10699,
+    "target_mean": 132.04,
+    "target_std": 51.91
+  },
+  "model2": {
+    "prophet_features": [
+      "max_rainfall",
+      "max_aqi",
+      "n_active_policies",
+      "is_monsoon",
+      "is_winter",
+      "exposure_score",
+      "avg_zone_risk"
+    ],
+    "xgb_features": [
+      "max_rainfall",
+      "max_aqi",
+      "max_temp",
+      "curfew_any",
+      "flood_any",
+      "avg_zone_risk",
+      "avg_rain_forecast",
+      "avg_aqi_forecast",
+      "n_active_policies",
+      "is_monsoon",
+      "is_winter",
+      "exposure_score",
+      "week_of_year"
+    ],
+    "target": "loss_ratio",
+    "cities": [
+      "Ahmedabad",
+      "Bengaluru",
+      "Chennai",
+      "Delhi",
+      "Hyderabad",
+      "Kolkata",
+      "Mumbai",
+      "Pune"
+    ],
+    "weeks_per_city": 156
+  },
+  "model3": {
+    "features": [
+      "gps_violation",
+      "gps_spoof_detected",
+      "delivery_activity_detected",
+      "duplicate_claim",
+      "new_registration_fraud",
+      "abnormal_claim_freq",
+      "n_fraud_signals",
+      "payout_premium_ratio",
+      "earnings_normalized",
+      "disruption_severity",
+      "rainfall_normalized",
+      "aqi_normalized",
+      "platforms_norm",
+      "fraud_risk_score"
+    ],
+    "target": "is_fraud_ground_truth",
+    "fraud_rate": 0.0799,
+    "contamination_param": 0.08,
+    "scaler": "scaler_model3.pkl"
+  },
+  "model4": {
+    "zone_features": [
+      "zone_risk_score",
+      "waterlogging_risk_score",
+      "hist_claim_rate",
+      "hist_disruption_freq_per_year",
+      "avg_aqi_baseline",
+      "drainage_score",
+      "curfew_history_count",
+      "platform_activity_density"
+    ],
+    "worker_features": [
+      "zone_risk_score",
+      "waterlogging_risk_score",
+      "weekly_earnings_avg",
+      "hours_per_day",
+      "active_days_per_week",
+      "n_platforms",
+      "loyalty_weeks",
+      "autopay_enabled",
+      "multi_platform_score",
+      "hist_claim_count",
+      "weeks_active",
+      "log_earnings",
+      "claim_rate_personal",
+      "weekly_active_hours",
+      "earnings_per_hour"
+    ],
+    "recommended_k": 3,
+    "elbow_inertias": {
+      "2": 737.45,
+      "3": 583.92,
+      "4": 490.08,
+      "5": 426.91,
+      "6": 387.74,
+      "7": 360.37,
+      "8": 325.94
+    },
+    "zone_rows": 130,
+    "worker_rows": 5000
+  }
+}

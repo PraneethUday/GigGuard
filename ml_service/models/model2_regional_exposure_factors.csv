@@ -1,0 +1,9 @@
+city,predicted_loss_ratio,exposure_factor,example_premium_adj
+Chennai,2.4075,1.8,126.0
+Delhi,0.9895,1.2395,86.8
+Mumbai,1.7058,1.8,126.0
+Bengaluru,1.3726,1.6226,113.6
+Hyderabad,1.2274,1.4774,103.4
+Pune,0.3296,0.9,63.0
+Kolkata,0.58,0.9,63.0
+Ahmedabad,0.0365,0.9,63.0

@@ -1,0 +1,15 @@
+feature,importance
+avg_zone_risk,0.23175149
+exposure_score,0.20780975
+avg_rain_forecast,0.10467243
+avg_aqi_forecast,0.09381546
+curfew_any,0.07807958
+n_active_policies,0.06682038
+max_rainfall,0.06463697
+max_aqi,0.043144234
+city_encoded,0.032965194
+week_of_year,0.026923416
+flood_any,0.02202946
+max_temp,0.0168748
+is_winter,0.0102856085
+is_monsoon,0.00019123864

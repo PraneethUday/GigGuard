@@ -1,0 +1,152 @@
+{
+  "model_name": "GigGuard Regional Profit Protection",
+  "version": "1.0.0",
+  "xgb_features": [
+    "max_rainfall",
+    "max_aqi",
+    "max_temp",
+    "curfew_any",
+    "flood_any",
+    "avg_zone_risk",
+    "avg_rain_forecast",
+    "avg_aqi_forecast",
+    "n_active_policies",
+    "is_monsoon",
+    "is_winter",
+    "exposure_score",
+    "week_of_year",
+    "city_encoded"
+  ],
+  "prophet_regressors": [
+    "max_rainfall",
+    "max_aqi",
+    "n_active_policies",
+    "is_monsoon",
+    "is_winter",
+    "exposure_score",
+    "avg_zone_risk"
+  ],
+  "target": "loss_ratio",
+  "city_encoding": {
+    "Ahmedabad": 0,
+    "Bengaluru": 1,
+    "Chennai": 2,
+    "Delhi": 3,
+    "Hyderabad": 4,
+    "Kolkata": 5,
+    "Mumbai": 6,
+    "Pune": 7
+  },
+  "xgb_val_metrics": {
+    "rmse": 0.2574,
+    "mae": 0.0592,
+    "r2": 0.8142
+  },
+  "xgb_test_metrics": {
+    "rmse": 0.3004,
+    "mae": 0.0837,
+    "r2": 0.8162
+  },
+  "prophet_results": {
+    "Ahmedabad": {
+      "rmse": 4.98,
+      "mae": 1.53,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Bengaluru": {
+      "rmse": 3.68,
+      "mae": 1.32,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Chennai": {
+      "rmse": 53.37,
+      "mae": 34.27,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Delhi": {
+      "rmse": 641.62,
+      "mae": 346.28,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Hyderabad": {
+      "rmse": 20.93,
+      "mae": 11.18,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Kolkata": {
+      "rmse": 116.47,
+      "mae": 64.41,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Mumbai": {
+      "rmse": 46.93,
+      "mae": 28.7,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    },
+    "Pune": {
+      "rmse": 11.38,
+      "mae": 6.5,
+      "test_weeks": 12,
+      "avg_actual_payout": 0.0
+    }
+  },
+  "exposure_factors": [
+    {
+      "city": "Chennai",
+      "predicted_loss_ratio": 2.4075,
+      "exposure_factor": 1.8,
+      "example_premium_adj": 126.0
+    },
+    {
+      "city": "Delhi",
+      "predicted_loss_ratio": 0.9895,
+      "exposure_factor": 1.2395,
+      "example_premium_adj": 86.8
+    },
+    {
+      "city": "Mumbai",
+      "predicted_loss_ratio": 1.7058,
+      "exposure_factor": 1.8,
+      "example_premium_adj": 126.0
+    },
+    {
+      "city": "Bengaluru",
+      "predicted_loss_ratio": 1.3726,
+      "exposure_factor": 1.6226,
+      "example_premium_adj": 113.6
+    },
+    {
+      "city": "Hyderabad",
+      "predicted_loss_ratio": 1.2274,
+      "exposure_factor": 1.4774,
+      "example_premium_adj": 103.4
+    },
+    {
+      "city": "Pune",
+      "predicted_loss_ratio": 0.3296,
+      "exposure_factor": 0.9,
+      "example_premium_adj": 63.0
+    },
+    {
+      "city": "Kolkata",
+      "predicted_loss_ratio": 0.58,
+      "exposure_factor": 0.9,
+      "example_premium_adj": 63.0
+    },
+    {
+      "city": "Ahmedabad",
+      "predicted_loss_ratio": 0.0365,
+      "exposure_factor": 0.9,
+      "example_premium_adj": 63.0
+    }
+  ],
+  "target_profit_margin": 0.25,
+  "exposure_factor_cap": 1.8
+}
