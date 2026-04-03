@@ -1,368 +1,180 @@
 import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, Image, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  View, Text, StyleSheet, SafeAreaView,
+  ScrollView, TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, SIZES } from '../constants/theme';
-import Button from '../components/Button';
+import { COLORS, FONTS, SIZES, SHADOWS } from '../constants/theme';
+
+const FEATURES = [
+  { icon: 'flash', label: 'Auto-Claims' },
+  { icon: 'rainy', label: 'Weather Alerts' },
+  { icon: 'cash', label: 'Instant Payouts' },
+];
+
+const PLATFORMS = ['Zomato', 'Swiggy', 'Amazon', 'Blinkit', 'Zepto'];
+
+const StatCard = ({ icon, text }) => (
+  <View style={styles.featurePill}>
+    <Ionicons name={icon} size={14} color={COLORS.amber} />
+    <Text style={styles.featurePillText}>{text}</Text>
+  </View>
+);
 
 const LandingScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header Bar */}
-      <View style={styles.header}>
-        <View style={styles.headerLogoContainer}>
-          <View style={styles.logoBackground}>
-            <Image
-              source={require('../assets/logo.png')}
-              style={styles.headerLogo}
-              resizeMode="contain"
-            />
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.logoRow}>
+            <View style={styles.logoIcon}>
+              <Ionicons name="shield-checkmark" size={18} color={COLORS.white} />
+            </View>
+            <Text style={styles.logoText}>GigGuard</Text>
           </View>
-          <Text style={styles.headerTitle}>GigGuard</Text>
-        </View>
-        <View style={styles.headerActions}>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-            <Text style={styles.loginText}>Login</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.getStartedSmall}
-            onPress={() => navigation.navigate('SignUp')}
-          >
-            <Text style={styles.getStartedSmallText}>Join</Text>
+            <Text style={styles.loginLink}>Login</Text>
           </TouchableOpacity>
         </View>
-      </View>
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
-        {/* Hero Section */}
+        {/* Hero */}
         <View style={styles.heroSection}>
-          {/* Delivery Illustration */}
-          <View style={styles.illustrationContainer}>
-            <Image
-              source={require('../assets/delivery.png')}
-              style={styles.illustration}
-              resizeMode="contain"
-            />
+          <View style={styles.heroBadge}>
+            <View style={styles.activeDot} />
+            <Text style={styles.heroBadgeText}>AI-Powered Protection</Text>
           </View>
-          
-          <View style={styles.textContainer}>
-            <View style={[styles.divider, { backgroundColor: COLORS.primary }]} />
-            <Text style={styles.motto}>
-              Protecting your hustle,{"\n"}rain or shine.
-            </Text>
-            <TouchableOpacity
-              style={styles.ctaButton}
-              onPress={() => navigation.navigate('Home')}
-            >
-              <Text style={styles.ctaButtonText}>Get Protected →</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
 
-        {/* About Section Card */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="information-circle-outline" size={24} color={COLORS.primary} style={{ marginRight: 10 }} />
-            <Text style={styles.sectionTitle}>About GigGuard</Text>
-          </View>
-          <Text style={styles.sectionText}>
-            GigGuard is a premium insurance platform designed specifically for the unique needs of freelancers. We provide instant, parametric protection that traditional insurance misses.
+          <Text style={styles.heroTitle}>Your Income.{'\n'}Protected.</Text>
+          <Text style={styles.heroSubtitle}>
+            Automatic payouts when rain, AQI, or curfews stop your deliveries. No paperwork. No waiting.
           </Text>
+
+          {/* Feature pills */}
+          <View style={styles.featureRow}>
+            {FEATURES.map(f => (
+              <StatCard key={f.label} icon={f.icon} text={f.label} />
+            ))}
+          </View>
         </View>
 
-        {/* How It Works Card */}
+        {/* Illustration / Shield card */}
+        <View style={styles.shieldCard}>
+          <View style={styles.shieldGlow} />
+          <Ionicons name="shield-checkmark" size={64} color={COLORS.primary} style={{ zIndex: 1 }} />
+          <Text style={styles.shieldCardTitle}>Income Shield Active</Text>
+          <View style={styles.shieldMetrics}>
+            <View style={styles.shieldMetric}>
+              <Text style={styles.shieldMetricValue}>₹1,200</Text>
+              <Text style={styles.shieldMetricLabel}>Max Weekly Cover</Text>
+            </View>
+            <View style={styles.shieldMetricDivider} />
+            <View style={styles.shieldMetric}>
+              <Text style={styles.shieldMetricValue}>15 min</Text>
+              <Text style={styles.shieldMetricLabel}>Trigger Polling</Text>
+            </View>
+            <View style={styles.shieldMetricDivider} />
+            <View style={styles.shieldMetric}>
+              <Text style={styles.shieldMetricValue}>5 triggers</Text>
+              <Text style={styles.shieldMetricLabel}>Events Covered</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* How it works */}
         <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="git-branch-outline" size={24} color={COLORS.primary} style={{ marginRight: 10 }} />
-            <Text style={styles.sectionTitle}>How It Works</Text>
-          </View>
-          <View style={styles.stepContainer}>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}><Text style={styles.stepNumberText}>1</Text></View>
-              <Text style={styles.stepText}>Connect your gig platform and location services.</Text>
+          <Text style={styles.sectionTitle}>How it works</Text>
+          {[
+            { n: '1', text: 'Register & verify your delivery platforms' },
+            { n: '2', text: 'Pay ₹20–130/week based on your earnings & risk' },
+            { n: '3', text: 'Auto-claims fire when disruptions hit your zone' },
+          ].map(step => (
+            <View key={step.n} style={styles.stepRow}>
+              <View style={styles.stepNum}>
+                <Text style={styles.stepNumText}>{step.n}</Text>
+              </View>
+              <Text style={styles.stepText}>{step.text}</Text>
             </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}><Text style={styles.stepNumberText}>2</Text></View>
-              <Text style={styles.stepText}>Our AI monitors weather triggers in real-time.</Text>
-            </View>
-            <View style={styles.stepItem}>
-              <View style={styles.stepNumber}><Text style={styles.stepNumberText}>3</Text></View>
-              <Text style={styles.stepText}>Receive instant payouts directly to your wallet.</Text>
-            </View>
-          </View>
+          ))}
         </View>
 
-        {/* Benefits Grid Card */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="diamond-outline" size={24} color={COLORS.primary} style={{ marginRight: 10 }} />
-            <Text style={styles.sectionTitle}>Why Choose Us</Text>
-          </View>
-          <View style={styles.benefitsGrid}>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitIconContainer}>
-                <Ionicons name="flash-outline" size={22} color={COLORS.primary} />
-              </View>
-              <Text style={styles.benefitTitle}>Instant Pay</Text>
+        {/* CTA */}
+        <TouchableOpacity style={styles.ctaButton} onPress={() => navigation.navigate('SignUp')} activeOpacity={0.85}>
+          <Text style={styles.ctaText}>Get Protected — Free Setup</Text>
+          <Ionicons name="arrow-forward" size={18} color={COLORS.white} />
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={{ alignItems: 'center', marginTop: SIZES.padding }}>
+          <Text style={styles.loginHint}>Already insured? <Text style={{ color: COLORS.primary }}>Log in</Text></Text>
+        </TouchableOpacity>
+
+        {/* Platform row */}
+        <View style={styles.platformRow}>
+          {PLATFORMS.map(p => (
+            <View key={p} style={styles.platformPill}>
+              <Text style={styles.platformText}>{p}</Text>
             </View>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitIconContainer}>
-                <Ionicons name="analytics-outline" size={22} color={COLORS.primary} />
-              </View>
-              <Text style={styles.benefitTitle}>AI-Driven</Text>
-            </View>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitIconContainer}>
-                <Ionicons name="shield-outline" size={22} color={COLORS.primary} />
-              </View>
-              <Text style={styles.benefitTitle}>Secure</Text>
-            </View>
-            <View style={styles.benefitItem}>
-              <View style={styles.benefitIconContainer}>
-                <Ionicons name="people-outline" size={22} color={COLORS.primary} />
-              </View>
-              <Text style={styles.benefitTitle}>Community</Text>
-            </View>
-          </View>
+          ))}
         </View>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2026 GigGuard Technologies. All rights reserved.</Text>
-        </View>
+        <Text style={styles.footer}>© 2026 GigGuard Technologies · IRDAI Registered</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: COLORS.background,
-  },
-  scrollContent: {
-    paddingHorizontal: SIZES.padding,
-    paddingBottom: SIZES.padding * 2,
-  },
-  header: {
-    height: 65,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: SIZES.padding,
-    backgroundColor: '#A01E22', // Back to Deep Red Header
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-  },
-  headerLogoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  logoBackground: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: COLORS.white,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SIZES.base,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-  },
-  headerLogo: {
-    width: 24,
-    height: 24,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: FONTS.bold,
-    color: COLORS.white,
-    letterSpacing: 1,
-  },
-  headerActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  loginText: {
-    fontFamily: FONTS.bold,
-    color: COLORS.white,
-    marginRight: SIZES.padding,
-    fontSize: 14,
-  },
-  getStartedSmall: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)', // Restore semi-transparent white
-    paddingHorizontal: SIZES.padding,
-    paddingVertical: SIZES.base * 0.8,
-    borderRadius: SIZES.radius,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.4)',
-  },
-  getStartedSmallText: {
-    color: COLORS.white,
-    fontFamily: FONTS.bold,
-    fontSize: 14,
-  },
-  heroSection: {
-    alignItems: 'center',
-    paddingVertical: SIZES.padding * 3,
-    paddingHorizontal: SIZES.padding,
-  },
-  illustrationContainer: {
-    width: '100%',
-    height: 240, // Balanced size for a neater look
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginVertical: SIZES.base,
-  },
-  illustration: {
-    width: '100%',
-    height: '100%',
-  },
-  textContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
-  divider: {
-    width: 60,
-    height: 4,
-    backgroundColor: '#A51C30', // Ruby Red Divider
-    borderRadius: 2,
-    marginBottom: SIZES.padding,
-  },
-  motto: {
-    fontSize: SIZES.h2,
-    fontFamily: FONTS.medium,
-    color: '#1B1B3A', // Restoring dark motto text
-    textAlign: 'center',
-    lineHeight: 38,
-    maxWidth: '90%',
-  },
-  buttonContainer: {
-    width: '100%',
-    marginBottom: SIZES.padding * 1.5,
-  },
-  button: {
-    marginVertical: SIZES.base,
-  },
-  section: {
-    backgroundColor: COLORS.surface,
-    padding: SIZES.padding,
-    borderRadius: SIZES.radius,
-    marginBottom: SIZES.padding,
-    borderWidth: 1,
-    borderColor: 'rgba(27, 27, 58, 0.05)',
-  },
-  sectionTitle: {
-    fontSize: SIZES.h2,
-    fontFamily: FONTS.bold,
-    color: COLORS.secondary,
-    marginBottom: SIZES.padding * 0.5,
-  },
-  sectionText: {
-    fontSize: SIZES.body,
-    fontFamily: FONTS.medium,
-    color: COLORS.text,
-    lineHeight: 24,
-    opacity: 0.8,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: SIZES.base * 1.5,
-  },
-  stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: COLORS.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: SIZES.base,
-  },
-  stepNumberText: {
-    color: COLORS.white,
-    fontFamily: FONTS.bold,
-    fontSize: 14,
-  },
-  stepContainer: {
-    marginTop: SIZES.base,
-  },
-  stepText: {
-    flex: 1,
-    fontSize: SIZES.body,
-    fontFamily: FONTS.medium,
-    color: COLORS.text,
-    opacity: 0.8,
-  },
-  benefitsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: SIZES.base,
-  },
-  benefitIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: 'rgba(165,28,48,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: SIZES.base * 0.75,
-  },
-  ctaButton: {
-    marginTop: SIZES.padding * 1.2,
-    backgroundColor: COLORS.primary,
-    paddingHorizontal: SIZES.padding * 1.5,
-    paddingVertical: 14,
-    borderRadius: SIZES.radius,
-    alignItems: 'center',
-    shadowColor: COLORS.primary,
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  ctaButtonText: {
-    fontSize: 16,
-    fontFamily: FONTS.bold,
-    color: COLORS.white,
-    letterSpacing: 0.3,
-  },
-  benefitRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: SIZES.padding * 0.5,
-  },
-  benefitItem: {
-    width: '47%',
-    alignItems: 'center',
-    padding: SIZES.base * 1.5,
-    backgroundColor: 'rgba(165,28,48,0.07)',
-    borderRadius: SIZES.radius * 0.75,
-  },
-  benefitIcon: {
-    marginBottom: SIZES.base * 0.5,
-  },
-  benefitTitle: {
-    fontSize: SIZES.body * 0.9,
-    fontFamily: FONTS.bold,
-    color: COLORS.secondary,
-    textAlign: 'center',
-  },
-  footer: {
-    paddingVertical: SIZES.padding,
-    alignItems: 'center',
-  },
-  footerText: {
-    fontSize: 12,
-    fontFamily: FONTS.medium,
-    color: COLORS.text,
-    opacity: 0.5,
-  },
+  container: { flex: 1, backgroundColor: COLORS.surface },
+  scroll: { paddingBottom: SIZES.padding * 3 },
+
+  // Header
+  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: SIZES.padding, paddingTop: SIZES.padding, paddingBottom: SIZES.base },
+  logoRow: { flexDirection: 'row', alignItems: 'center', gap: SIZES.base },
+  logoIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: COLORS.primary, justifyContent: 'center', alignItems: 'center' },
+  logoText: { fontSize: 18, fontFamily: FONTS.bold, color: COLORS.white },
+  loginLink: { fontSize: 14, fontFamily: FONTS.semiBold, color: COLORS.primaryDim },
+
+  // Hero
+  heroSection: { paddingHorizontal: SIZES.padding, paddingTop: SIZES.padding * 1.5, paddingBottom: SIZES.padding },
+  heroBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.primaryContainer, paddingHorizontal: 12, paddingVertical: 6, borderRadius: SIZES.radiusFull, alignSelf: 'flex-start', marginBottom: SIZES.padding },
+  activeDot: { width: 7, height: 7, borderRadius: 4, backgroundColor: COLORS.success },
+  heroBadgeText: { fontSize: SIZES.tiny, fontFamily: FONTS.semiBold, color: COLORS.primaryDim, letterSpacing: 0.5 },
+  heroTitle: { fontSize: 38, fontFamily: FONTS.bold, color: COLORS.white, lineHeight: 46, marginBottom: SIZES.padding * 0.75, letterSpacing: -0.5 },
+  heroSubtitle: { fontSize: SIZES.body, fontFamily: FONTS.regular, color: COLORS.textMuted, lineHeight: 24, marginBottom: SIZES.padding },
+  featureRow: { flexDirection: 'row', gap: SIZES.base, flexWrap: 'wrap' },
+  featurePill: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.surfaceHigh, paddingHorizontal: 12, paddingVertical: 7, borderRadius: SIZES.radiusFull, borderWidth: 1, borderColor: COLORS.border },
+  featurePillText: { fontSize: SIZES.small, fontFamily: FONTS.semiBold, color: COLORS.white },
+
+  // Shield Card
+  shieldCard: { marginHorizontal: SIZES.padding, borderRadius: SIZES.radius * 1.5, backgroundColor: COLORS.surfaceContainer, padding: SIZES.padding * 1.25, alignItems: 'center', marginBottom: SIZES.padding, overflow: 'hidden', ...SHADOWS.card },
+  shieldGlow: { position: 'absolute', width: 180, height: 180, borderRadius: 90, backgroundColor: COLORS.primary, opacity: 0.08, top: -40, alignSelf: 'center' },
+  shieldCardTitle: { fontSize: SIZES.h3, fontFamily: FONTS.bold, color: COLORS.white, marginTop: SIZES.base, marginBottom: SIZES.padding },
+  shieldMetrics: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', borderTopWidth: 1, borderTopColor: COLORS.border, paddingTop: SIZES.padding },
+  shieldMetric: { flex: 1, alignItems: 'center' },
+  shieldMetricValue: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.primary, marginBottom: 4 },
+  shieldMetricLabel: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.textFaint, textAlign: 'center' },
+  shieldMetricDivider: { width: 1, backgroundColor: COLORS.border },
+
+  // Steps
+  section: { paddingHorizontal: SIZES.padding, marginBottom: SIZES.padding },
+  sectionTitle: { fontSize: SIZES.h3, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: SIZES.padding },
+  stepRow: { flexDirection: 'row', alignItems: 'flex-start', gap: SIZES.padding * 0.75, marginBottom: SIZES.padding * 0.75 },
+  stepNum: { width: 28, height: 28, borderRadius: 14, backgroundColor: COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.primary },
+  stepNumText: { fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.primary },
+  stepText: { flex: 1, fontSize: SIZES.body, fontFamily: FONTS.regular, color: COLORS.textMuted, lineHeight: 22, paddingTop: 3 },
+
+  // CTA
+  ctaButton: { marginHorizontal: SIZES.padding, height: 56, borderRadius: SIZES.radiusFull, backgroundColor: COLORS.primary, flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 10, ...SHADOWS.button },
+  ctaText: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.white },
+  loginHint: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.textFaint },
+
+  // Platforms
+  platformRow: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: SIZES.base, paddingHorizontal: SIZES.padding, marginTop: SIZES.padding * 1.5 },
+  platformPill: { backgroundColor: COLORS.surfaceHigh, paddingHorizontal: 12, paddingVertical: 5, borderRadius: SIZES.radiusFull, borderWidth: 1, borderColor: COLORS.border },
+  platformText: { fontSize: SIZES.tiny, fontFamily: FONTS.semiBold, color: COLORS.textFaint },
+
+  footer: { textAlign: 'center', fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textFaint, marginTop: SIZES.padding, paddingHorizontal: SIZES.padding },
 });
 
 export default LandingScreen;

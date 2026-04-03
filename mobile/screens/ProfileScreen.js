@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, Switch } from 'react-native';
+import {
+  View, Text, StyleSheet, SafeAreaView,
+  ScrollView, TouchableOpacity, Switch,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, SIZES } from '../constants/theme';
+import { COLORS, FONTS, SIZES, SHADOWS } from '../constants/theme';
 
 const PLATFORMS = [
   { name: 'Zomato', id: 'ZOM-4829134', earnings: '₹1,600/wk avg', verified: true },
@@ -12,13 +15,13 @@ const Row = ({ label, value, icon, onPress }) => (
   <TouchableOpacity onPress={onPress} style={styles.row} activeOpacity={onPress ? 0.7 : 1}>
     <View style={styles.rowLeft}>
       <View style={styles.rowIcon}>
-        <Ionicons name={icon} size={18} color={COLORS.primary} />
+        <Ionicons name={icon} size={16} color={COLORS.primary} />
       </View>
       <Text style={styles.rowLabel}>{label}</Text>
     </View>
     <View style={styles.rowRight}>
       <Text style={styles.rowValue}>{value}</Text>
-      {onPress && <Ionicons name="chevron-forward" size={16} color={COLORS.gray} />}
+      {onPress && <Ionicons name="chevron-forward" size={14} color={COLORS.textFaint} />}
     </View>
   </TouchableOpacity>
 );
@@ -30,17 +33,20 @@ export default function ProfileScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={COLORS.white} />
+          <Ionicons name="arrow-back" size={20} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Profile</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
-        {/* Avatar + Name */}
+
+        {/* Avatar section */}
         <View style={styles.avatarSection}>
+          <View style={styles.avatarGlow} />
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>RK</Text>
           </View>
@@ -87,7 +93,7 @@ export default function ProfileScreen({ navigation }) {
             </View>
           ))}
           <TouchableOpacity style={styles.addPlatformBtn}>
-            <Ionicons name="add-circle-outline" size={20} color={COLORS.primary} />
+            <Ionicons name="add-circle-outline" size={18} color={COLORS.primary} />
             <Text style={styles.addPlatformText}>Add Another Platform</Text>
           </TouchableOpacity>
         </View>
@@ -97,17 +103,18 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.sectionTitle}>Payment Settings</Text>
           <Row icon="wallet-outline" label="UPI ID" value="ravi@upi" />
           <Row icon="business-outline" label="Bank Account" value="SBI ••••4321" />
+
           <View style={styles.toggleRow}>
             <View style={styles.toggleLeft}>
               <View style={styles.rowIcon}>
-                <Ionicons name="repeat-outline" size={18} color={COLORS.primary} />
+                <Ionicons name="repeat-outline" size={16} color={COLORS.primary} />
               </View>
               <View>
                 <Text style={styles.toggleLabel}>AutoPay</Text>
                 <Text style={styles.toggleSub}>5% discount applied</Text>
               </View>
             </View>
-            <Switch value={autopay} onValueChange={setAutopay} trackColor={{ true: COLORS.success }} thumbColor={COLORS.white} />
+            <Switch value={autopay} onValueChange={setAutopay} trackColor={{ true: COLORS.primary }} thumbColor={COLORS.white} />
           </View>
         </View>
 
@@ -117,34 +124,36 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.toggleRow}>
             <View style={styles.toggleLeft}>
               <View style={styles.rowIcon}>
-                <Ionicons name="notifications-outline" size={18} color={COLORS.primary} />
+                <Ionicons name="notifications-outline" size={16} color={COLORS.primary} />
               </View>
               <View>
                 <Text style={styles.toggleLabel}>Claim Notifications</Text>
                 <Text style={styles.toggleSub}>Alerts when a claim is processed</Text>
               </View>
             </View>
-            <Switch value={notifications} onValueChange={setNotifications} trackColor={{ true: COLORS.success }} thumbColor={COLORS.white} />
+            <Switch value={notifications} onValueChange={setNotifications} trackColor={{ true: COLORS.primary }} thumbColor={COLORS.white} />
           </View>
+
           <View style={styles.toggleRow}>
             <View style={styles.toggleLeft}>
               <View style={styles.rowIcon}>
-                <Ionicons name="location-outline" size={18} color={COLORS.primary} />
+                <Ionicons name="location-outline" size={16} color={COLORS.primary} />
               </View>
               <View>
                 <Text style={styles.toggleLabel}>GPS Validation Consent</Text>
                 <Text style={styles.toggleSub}>Required for claim fraud prevention</Text>
               </View>
             </View>
-            <Switch value={gpsConsent} onValueChange={setGpsConsent} trackColor={{ true: COLORS.success }} thumbColor={COLORS.white} />
+            <Switch value={gpsConsent} onValueChange={setGpsConsent} trackColor={{ true: COLORS.primary }} thumbColor={COLORS.white} />
           </View>
         </View>
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutBtn} onPress={() => navigation.navigate('Landing')}>
-          <Ionicons name="log-out-outline" size={20} color={COLORS.primary} />
+          <Ionicons name="log-out-outline" size={18} color={COLORS.error} />
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
+
         <Text style={styles.footer}>GigGuard v1.0.0 · IRDAI Registered</Text>
       </ScrollView>
     </SafeAreaView>
@@ -152,42 +161,56 @@ export default function ProfileScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { height: 60, backgroundColor: COLORS.secondary, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SIZES.padding },
-  backBtn: { width: 40, height: 40, justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontFamily: FONTS.bold, color: COLORS.white },
+  container: { flex: 1, backgroundColor: COLORS.surface },
+
+  header: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SIZES.padding, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.surfaceHigh, justifyContent: 'center', alignItems: 'center' },
+  headerTitle: { fontSize: SIZES.h3, fontFamily: FONTS.bold, color: COLORS.white },
   scroll: { paddingBottom: SIZES.padding * 3 },
-  avatarSection: { alignItems: 'center', paddingVertical: SIZES.padding * 1.5, backgroundColor: COLORS.secondary },
-  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: 'rgba(255,255,255,0.15)', justifyContent: 'center', alignItems: 'center', marginBottom: 12, borderWidth: 2, borderColor: 'rgba(255,255,255,0.2)' },
-  avatarText: { fontSize: 24, fontFamily: FONTS.bold, color: COLORS.white },
-  name: { fontSize: 22, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 4 },
-  zone: { fontSize: 14, fontFamily: FONTS.medium, color: 'rgba(255,255,255,0.55)', marginBottom: 12 },
-  protectedBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: 'rgba(34,197,94,0.15)', paddingHorizontal: 14, paddingVertical: 6, borderRadius: 100 },
-  protectedText: { fontSize: 13, fontFamily: FONTS.bold, color: COLORS.success },
-  section: { backgroundColor: COLORS.surface, marginHorizontal: SIZES.padding, marginTop: SIZES.padding, borderRadius: SIZES.radius, borderWidth: 1, borderColor: 'rgba(27,27,58,0.06)', overflow: 'hidden' },
-  sectionTitle: { fontSize: 11, fontFamily: FONTS.bold, color: 'rgba(27,27,58,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', padding: SIZES.padding * 0.75, paddingBottom: 8, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.05)' },
-  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.6, paddingHorizontal: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.04)' },
+
+  // Avatar
+  avatarSection: { alignItems: 'center', paddingVertical: SIZES.padding * 1.5, backgroundColor: COLORS.surfaceContainer, borderBottomWidth: 1, borderBottomColor: COLORS.border, position: 'relative', overflow: 'hidden' },
+  avatarGlow: { position: 'absolute', width: 160, height: 160, borderRadius: 80, backgroundColor: COLORS.primary, opacity: 0.06, top: -40 },
+  avatar: { width: 72, height: 72, borderRadius: 36, backgroundColor: COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center', marginBottom: 12, borderWidth: 2, borderColor: COLORS.primary + '50' },
+  avatarText: { fontSize: 24, fontFamily: FONTS.bold, color: COLORS.primary },
+  name: { fontSize: SIZES.h2, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 4 },
+  zone: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.textMuted, marginBottom: 12 },
+  protectedBadge: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: COLORS.successContainer, paddingHorizontal: 14, paddingVertical: 6, borderRadius: SIZES.radiusFull, borderWidth: 1, borderColor: COLORS.success + '30' },
+  protectedText: { fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.success },
+
+  // Sections
+  section: { marginHorizontal: SIZES.padding, marginTop: SIZES.padding, borderRadius: SIZES.radius * 1.2, backgroundColor: COLORS.surfaceContainer, borderWidth: 1, borderColor: COLORS.border, overflow: 'hidden' },
+  sectionTitle: { fontSize: SIZES.tiny, fontFamily: FONTS.bold, color: COLORS.textFaint, textTransform: 'uppercase', letterSpacing: 1, padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+
+  // Rows
+  row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.7, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   rowLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  rowIcon: { width: 34, height: 34, borderRadius: 10, backgroundColor: 'rgba(165,28,48,0.07)', justifyContent: 'center', alignItems: 'center' },
-  rowLabel: { fontSize: 14, fontFamily: FONTS.medium, color: COLORS.text },
-  rowRight: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rowValue: { fontSize: 13, fontFamily: FONTS.bold, color: 'rgba(27,27,58,0.5)', maxWidth: 140, textAlign: 'right' },
-  platformCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.04)' },
+  rowIcon: { width: 32, height: 32, borderRadius: 10, backgroundColor: COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center' },
+  rowLabel: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.white },
+  rowRight: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  rowValue: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.textFaint, maxWidth: 140, textAlign: 'right' },
+
+  // Platforms
+  platformCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   platformLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  platformIconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: 'rgba(165,28,48,0.08)', justifyContent: 'center', alignItems: 'center' },
+  platformIconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.primaryContainer, justifyContent: 'center', alignItems: 'center' },
   platformInitial: { fontSize: 18, fontFamily: FONTS.bold, color: COLORS.primary },
-  platformName: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent },
-  platformId: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.4)', marginTop: 1 },
-  platformEarnings: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.4)' },
-  verifiedBadge: { backgroundColor: 'rgba(34,197,94,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 100 },
-  verifiedText: { fontSize: 11, fontFamily: FONTS.bold, color: '#16a34a' },
-  addPlatformBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: SIZES.padding * 0.75, borderTopWidth: 1, borderTopColor: 'rgba(27,27,58,0.05)' },
-  addPlatformText: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.primary },
-  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.04)' },
+  platformName: { fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.white },
+  platformId: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.textFaint, marginTop: 1 },
+  platformEarnings: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.primary, marginTop: 1 },
+  verifiedBadge: { backgroundColor: COLORS.successContainer, paddingHorizontal: 10, paddingVertical: 4, borderRadius: SIZES.radiusFull, borderWidth: 1, borderColor: COLORS.success + '30' },
+  verifiedText: { fontSize: SIZES.tiny, fontFamily: FONTS.bold, color: COLORS.success },
+  addPlatformBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, padding: SIZES.padding * 0.85, borderTopWidth: 1, borderTopColor: COLORS.border },
+  addPlatformText: { fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.primary },
+
+  // Toggles
+  toggleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   toggleLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
-  toggleLabel: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.text },
-  toggleSub: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.4)', marginTop: 1 },
-  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8, margin: SIZES.padding, marginTop: SIZES.padding * 1.5, height: 52, borderRadius: SIZES.radius, borderWidth: 1.5, borderColor: 'rgba(165,28,48,0.2)', backgroundColor: 'rgba(165,28,48,0.04)' },
-  logoutText: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.primary },
-  footer: { textAlign: 'center', fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.3)', paddingBottom: SIZES.padding },
+  toggleLabel: { fontSize: SIZES.small, fontFamily: FONTS.semiBold, color: COLORS.white },
+  toggleSub: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.textFaint, marginTop: 2 },
+
+  // Logout
+  logoutBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, margin: SIZES.padding, marginTop: SIZES.padding * 1.5, height: 52, borderRadius: SIZES.radius, borderWidth: 1, borderColor: COLORS.error + '40', backgroundColor: COLORS.errorContainer },
+  logoutText: { fontSize: SIZES.body, fontFamily: FONTS.bold, color: COLORS.error },
+  footer: { textAlign: 'center', fontSize: 11, fontFamily: FONTS.regular, color: COLORS.textFaint, paddingBottom: SIZES.padding },
 });

@@ -1,181 +1,237 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import {
+  View, Text, StyleSheet, SafeAreaView,
+  ScrollView, TouchableOpacity,
+} from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { COLORS, FONTS, SIZES } from '../constants/theme';
+import { COLORS, FONTS, SIZES, SHADOWS } from '../constants/theme';
 
-const BACKEND_URL = 'http://localhost:8000'; // Target FastAPI backend
+const CLAIMS = [
+  { id: 'CLM-4821', type: 'Heavy Rain', icon: 'rainy', date: 'Mar 28, 2026', zone: 'Chennai South', hours: 4, amount: 175, status: 'paid', time: '9 min 32 sec' },
+  { id: 'CLM-4755', type: 'AQI Alert', icon: 'cloud', date: 'Mar 15, 2026', zone: 'Chennai Central', hours: 6, amount: 263, status: 'paid', time: '11 min' },
+  { id: 'CLM-4690', type: 'Curfew', icon: 'ban', date: 'Mar 2, 2026', zone: 'Chennai North', hours: 3, amount: 131, status: 'paid', time: '7 min 44 sec' },
+  { id: 'CLM-4610', type: 'Heavy Rain', icon: 'rainy', date: 'Feb 21, 2026', zone: 'Chennai South', hours: 5, amount: 219, status: 'rejected', reason: 'Active deliveries detected during window' },
+];
 
-const statusConfig = {
-  paid: { bg: 'rgba(34,197,94,0.12)', color: '#16a34a', label: 'Paid', icon: 'checkmark-circle' },
-  approved: { bg: 'rgba(34,197,94,0.12)', color: '#16a34a', label: 'Approved', icon: 'checkmark-circle' },
-  'under_review': { bg: 'rgba(245,158,11,0.12)', color: '#d97706', label: 'Under Review', icon: 'time' },
-  pending: { bg: 'rgba(245,158,11,0.12)', color: '#d97706', label: 'Pending', icon: 'time' },
-  rejected: { bg: 'rgba(239,68,68,0.12)', color: '#dc2626', label: 'Rejected', icon: 'close-circle' },
-  auto_initiated: { bg: 'rgba(59,130,246,0.12)', color: '#2563eb', label: 'Initiated', icon: 'flash' },
+const STATUS = {
+  paid: { bg: '#0A2E18', color: COLORS.success, label: 'Paid', icon: 'checkmark-circle' },
+  'under-review': { bg: '#2A1A0A', color: COLORS.amber, label: 'Processing', icon: 'time' },
+  rejected: { bg: '#2E0A0A', color: COLORS.error, label: 'Rejected', icon: 'close-circle' },
 };
 
-export default function ClaimsScreen({ route, navigation }) {
+const FILTERS = ['all', 'paid', 'under-review', 'rejected'];
+
+export default function ClaimsScreen({ navigation }) {
   const [filter, setFilter] = useState('all');
-  const [claims, setClaims] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  // Fallback to a mock worker ID if not passed mapping to the test data
-  const workerId = route?.params?.userId || 'w_sw_001';
-
-  React.useEffect(() => {
-    fetchClaims();
-  }, [workerId]);
-
-  const fetchClaims = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/claims/worker/${workerId}`);
-      const data = await res.json();
-      if (data && data.data) {
-        setClaims(data.data);
-      }
-    } catch (e) {
-      console.log('Error fetching claims:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filtered = filter === 'all' ? claims : claims.filter(c => c.payout_status === filter || c.status === filter);
-
-  const totalPaid = claims.filter(c => c.payout_status === 'paid').reduce((a, c) => a + c.payout_amount, 0);
+  const filtered = filter === 'all' ? CLAIMS : CLAIMS.filter(c => c.status === filter);
+  const totalPaid = CLAIMS.filter(c => c.status === 'paid').reduce((a, c) => a + c.amount, 0);
+  const paidCount = CLAIMS.filter(c => c.status === 'paid').length;
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backBtn}>
-          <Ionicons name="arrow-back" size={22} color={COLORS.white} />
+          <Ionicons name="arrow-back" size={20} color={COLORS.white} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Claims</Text>
         <View style={{ width: 40 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Summary Banner */}
-        <View style={styles.summaryBanner}>
+
+        {/* Live Disruption Alert */}
+        <View style={styles.liveAlert}>
+          <View style={styles.liveAlertTop}>
+            <View style={styles.liveDot} />
+            <Text style={styles.liveAlertTitle}>DISRUPTION DETECTED</Text>
+            <View style={styles.liveBadge}><Text style={styles.liveBadgeText}>LIVE</Text></View>
+          </View>
+          <Text style={styles.liveAlertSub}>Heavy rainfall in Chennai — 68mm/24h (Red Alert IMD)</Text>
+          <Text style={styles.liveAlertSub}>Auto-claim initiated for your policy</Text>
+
+          {/* Progress steps */}
+          <View style={styles.claimSteps}>
+            {['Detected', 'Validated', 'Processing...', 'Payout'].map((s, i) => {
+              const done = i < 2;
+              const active = i === 2;
+              return (
+                <React.Fragment key={s}>
+                  <View style={styles.claimStep}>
+                    <View style={[styles.claimStepDot, done && styles.claimStepDone, active && styles.claimStepActive]}>
+                      {done && <Ionicons name="checkmark" size={9} color="#fff" />}
+                    </View>
+                    <Text style={[styles.claimStepText, active && { color: COLORS.amber }]}>{s}</Text>
+                  </View>
+                  {i < 3 && <View style={[styles.claimStepLine, done && { backgroundColor: COLORS.success }]} />}
+                </React.Fragment>
+              );
+            })}
+          </View>
+
+          <View style={styles.progressBar}><View style={[styles.progressFill, { width: '60%' }]} /></View>
+          <Text style={styles.estPayout}>Est. payout: <Text style={{ color: COLORS.success, fontFamily: FONTS.bold }}>₹175</Text> in ~8 minutes</Text>
+        </View>
+
+        {/* Summary banner */}
+        <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryValue}>{claims.length}</Text>
-            <Text style={styles.summaryLabel}>Total Claims</Text>
+            <Text style={styles.summaryValue}>{CLAIMS.length}</Text>
+            <Text style={styles.summaryLabel}>Total</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: '#4ade80' }]}>₹{totalPaid}</Text>
-            <Text style={styles.summaryLabel}>Total Received</Text>
+            <Text style={[styles.summaryValue, { color: COLORS.success }]}>₹{totalPaid}</Text>
+            <Text style={styles.summaryLabel}>Received</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryValue}>{claims.filter(c => c.payout_status === 'paid' || c.payout_status === 'approved').length}</Text>
-            <Text style={styles.summaryLabel}>Approved</Text>
+            <Text style={styles.summaryValue}>{paidCount}</Text>
+            <Text style={styles.summaryLabel}>Paid</Text>
+          </View>
+          <View style={styles.summaryDivider} />
+          <View style={styles.summaryItem}>
+            <Text style={[styles.summaryValue, { color: COLORS.error }]}>{CLAIMS.length - paidCount}</Text>
+            <Text style={styles.summaryLabel}>Rejected</Text>
           </View>
         </View>
 
-        {/* Info Banner */}
-        <View style={styles.infoBanner}>
-          <Ionicons name="information-circle-outline" size={18} color={COLORS.info} style={{ marginRight: 8 }} />
-          <Text style={styles.infoText}>All claims are triggered automatically — no filing required</Text>
+        {/* Info pill */}
+        <View style={styles.infoPill}>
+          <Ionicons name="information-circle-outline" size={16} color={COLORS.info} />
+          <Text style={styles.infoPillText}>All claims are triggered automatically — no filing required</Text>
         </View>
 
-        {/* Filter Tabs */}
-        <View style={styles.filterRow}>
-          {['all', 'paid', 'pending'].map(f => (
+        {/* Filter chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterRow} contentContainerStyle={{ paddingHorizontal: SIZES.padding, gap: 8 }}>
+          {FILTERS.map(f => (
             <TouchableOpacity
               key={f}
+              style={[styles.filterChip, filter === f && styles.filterChipActive]}
               onPress={() => setFilter(f)}
-              style={[styles.filterTab, filter === f && styles.filterTabActive]}
             >
-              <Text style={[styles.filterTabText, filter === f && styles.filterTabTextActive]}>
-                {f === 'all' ? 'All' : f === 'paid' ? '✓ Paid' : '⏳ Review'}
+              <Text style={[styles.filterChipText, filter === f && { color: COLORS.primary }]}>
+                {f === 'all' ? 'All' : f === 'paid' ? '✓ Paid' : f === 'under-review' ? '⏳ Processing' : '✕ Rejected'}
               </Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </ScrollView>
 
-        {/* Claims List */}
+        {/* Claims list */}
         <View style={styles.claimsList}>
-          {loading ? (
-            <Text style={{ textAlign: 'center', marginTop: 20 }}>Loading claims...</Text>
-          ) : filtered.map((claim, i) => {
-            const sc = statusConfig[claim.status] || statusConfig['auto_initiated'];
-            const claimDate = new Date(claim.created_at).toLocaleDateString();
+          {filtered.map(claim => {
+            const sc = STATUS[claim.status] || STATUS.paid;
             return (
               <View key={claim.id} style={styles.claimCard}>
                 <View style={styles.claimTop}>
-                  <View style={styles.claimIconWrap}>
-                    <Ionicons name={sc.icon} size={22} color={COLORS.primary} />
+                  <View style={[styles.claimIconWrap, { backgroundColor: sc.bg }]}>
+                    <Ionicons name={claim.icon} size={20} color={sc.color} />
                   </View>
-                  <View style={styles.claimInfo}>
-                    <Text style={styles.claimType}>{claim.trigger_type.replace('_', ' ')}</Text>
-                    <Text style={styles.claimDate}>{claimDate} · {claim.city}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.claimType}>{claim.type}</Text>
+                    <Text style={styles.claimDate}>{claim.date} · {claim.zone}</Text>
                   </View>
                   <View style={[styles.statusBadge, { backgroundColor: sc.bg }]}>
-                    <Text style={[styles.statusBadgeText, { color: sc.color }]}>{sc.label}</Text>
+                    <Text style={[styles.statusText, { color: sc.color }]}>{sc.label}</Text>
                   </View>
                 </View>
+
                 <View style={styles.claimBottom}>
                   <View style={styles.claimDetail}>
-                    <Text style={styles.claimDetailLabel}>Disrupted</Text>
-                    <Text style={styles.claimDetailValue}>{claim.disrupted_hours} hours</Text>
+                    <Text style={styles.detailLabel}>Disrupted</Text>
+                    <Text style={styles.detailValue}>{claim.hours} hrs</Text>
                   </View>
                   <View style={styles.claimDetail}>
-                    <Text style={styles.claimDetailLabel}>Claim ID</Text>
-                    <Text style={styles.claimDetailValue}>{claim.claim_number}</Text>
+                    <Text style={styles.detailLabel}>Claim ID</Text>
+                    <Text style={styles.detailValue}>{claim.id}</Text>
                   </View>
                   <View style={styles.claimDetail}>
-                    <Text style={styles.claimDetailLabel}>Payout</Text>
-                    <Text style={[styles.claimDetailValue, styles.claimAmount]}>₹{claim.payout_amount}</Text>
+                    <Text style={styles.detailLabel}>Payout</Text>
+                    <Text style={[styles.detailValue, { color: claim.status === 'paid' ? COLORS.success : COLORS.error }]}>
+                      {claim.status === 'rejected' ? '—' : `₹${claim.amount}`}
+                    </Text>
                   </View>
                 </View>
+
+                {claim.status === 'paid' && (
+                  <View style={styles.claimFooter}>
+                    <Ionicons name="flash" size={12} color={COLORS.success} />
+                    <Text style={styles.claimFooterText}>UPI credited in {claim.time}</Text>
+                  </View>
+                )}
+                {claim.status === 'rejected' && (
+                  <View style={styles.claimFooterRejected}>
+                    <Ionicons name="alert-circle" size={12} color={COLORS.error} />
+                    <Text style={styles.claimFooterRejectedText}>Reason: {claim.reason}</Text>
+                  </View>
+                )}
               </View>
             );
           })}
-          {filtered.length === 0 && (
-            <View style={styles.emptyState}>
-              <Ionicons name="document-outline" size={48} color={COLORS.gray} />
-              <Text style={styles.emptyStateText}>No claims for this filter</Text>
-            </View>
-          )}
         </View>
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: COLORS.background },
-  header: { height: 60, backgroundColor: COLORS.secondary, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SIZES.padding },
-  backBtn: { width: 40, height: 40, justifyContent: 'center' },
-  headerTitle: { fontSize: 18, fontFamily: FONTS.bold, color: COLORS.white },
-  summaryBanner: { backgroundColor: COLORS.secondary, flexDirection: 'row', justifyContent: 'space-around', paddingVertical: SIZES.padding, paddingHorizontal: SIZES.padding },
-  summaryItem: { alignItems: 'center' },
-  summaryValue: { fontSize: 22, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 2 },
-  summaryLabel: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(255,255,255,0.55)' },
-  summaryDivider: { width: 1, backgroundColor: 'rgba(255,255,255,0.15)' },
-  infoBanner: { flexDirection: 'row', alignItems: 'center', backgroundColor: 'rgba(59,130,246,0.08)', borderBottomWidth: 1, borderBottomColor: 'rgba(59,130,246,0.15)', padding: SIZES.padding * 0.6, paddingHorizontal: SIZES.padding },
-  infoText: { flex: 1, fontSize: 13, fontFamily: FONTS.medium, color: '#2563eb', lineHeight: 18 },
-  filterRow: { flexDirection: 'row', padding: SIZES.padding, gap: 10 },
-  filterTab: { flex: 1, paddingVertical: 9, borderRadius: 100, backgroundColor: COLORS.surface, alignItems: 'center', borderWidth: 1, borderColor: 'rgba(27,27,58,0.1)' },
-  filterTabActive: { backgroundColor: COLORS.accent, borderColor: COLORS.accent },
-  filterTabText: { fontSize: 13, fontFamily: FONTS.bold, color: 'rgba(27,27,58,0.5)' },
-  filterTabTextActive: { color: COLORS.white },
-  claimsList: { paddingHorizontal: SIZES.padding, paddingBottom: SIZES.padding * 3 },
-  claimCard: { backgroundColor: COLORS.surface, borderRadius: SIZES.radius, borderWidth: 1, borderColor: 'rgba(27,27,58,0.07)', marginBottom: SIZES.base * 1.5, overflow: 'hidden' },
-  claimTop: { flexDirection: 'row', alignItems: 'center', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.05)' },
-  claimIconWrap: { width: 42, height: 42, borderRadius: 12, backgroundColor: 'rgba(165,28,48,0.08)', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
-  claimInfo: { flex: 1 },
-  claimType: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.accent },
-  claimDate: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.45)', marginTop: 2 },
-  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 100 },
-  statusBadgeText: { fontSize: 11, fontFamily: FONTS.bold },
-  claimBottom: { flexDirection: 'row', justifyContent: 'space-between', padding: SIZES.padding * 0.75 },
+  container: { flex: 1, backgroundColor: COLORS.surface },
+
+  header: { height: 56, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: SIZES.padding, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  backBtn: { width: 40, height: 40, borderRadius: 12, backgroundColor: COLORS.surfaceHigh, justifyContent: 'center', alignItems: 'center' },
+  headerTitle: { fontSize: SIZES.h3, fontFamily: FONTS.bold, color: COLORS.white },
+
+  // Live Alert
+  liveAlert: { margin: SIZES.padding, borderRadius: SIZES.radius * 1.5, backgroundColor: COLORS.amberContainer, borderWidth: 1, borderColor: COLORS.amber + '50', padding: SIZES.padding },
+  liveAlertTop: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: SIZES.base },
+  liveDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: COLORS.amber },
+  liveAlertTitle: { flex: 1, fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.amber, letterSpacing: 0.5 },
+  liveBadge: { backgroundColor: COLORS.amber, paddingHorizontal: 8, paddingVertical: 3, borderRadius: SIZES.radiusFull },
+  liveBadgeText: { fontSize: 9, fontFamily: FONTS.bold, color: '#fff', letterSpacing: 0.5 },
+  liveAlertSub: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.amberDim, marginBottom: 4 },
+
+  claimSteps: { flexDirection: 'row', alignItems: 'center', marginVertical: SIZES.padding * 0.75 },
+  claimStep: { alignItems: 'center', gap: 4 },
+  claimStepDot: { width: 18, height: 18, borderRadius: 9, backgroundColor: COLORS.surfaceHighest, justifyContent: 'center', alignItems: 'center', borderWidth: 1, borderColor: COLORS.border },
+  claimStepDone: { backgroundColor: COLORS.success, borderColor: COLORS.success },
+  claimStepActive: { backgroundColor: COLORS.amber, borderColor: COLORS.amber },
+  claimStepText: { fontSize: 9, fontFamily: FONTS.medium, color: COLORS.textFaint },
+  claimStepLine: { flex: 1, height: 2, backgroundColor: COLORS.border, marginBottom: 12 },
+  progressBar: { height: 4, backgroundColor: COLORS.surfaceHighest, borderRadius: 2, overflow: 'hidden', marginTop: SIZES.base },
+  progressFill: { height: '100%', backgroundColor: COLORS.amber, borderRadius: 2 },
+  estPayout: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.textMuted, marginTop: SIZES.base },
+
+  // Summary
+  summaryRow: { flexDirection: 'row', backgroundColor: COLORS.surfaceContainer, marginHorizontal: SIZES.padding, borderRadius: SIZES.radius * 1.2, padding: SIZES.padding, marginBottom: SIZES.padding * 0.75, borderWidth: 1, borderColor: COLORS.border },
+  summaryItem: { flex: 1, alignItems: 'center' },
+  summaryValue: { fontSize: 20, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 2 },
+  summaryLabel: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.textFaint },
+  summaryDivider: { width: 1, backgroundColor: COLORS.border },
+
+  infoPill: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: SIZES.padding, marginBottom: SIZES.padding * 0.75 },
+  infoPillText: { flex: 1, fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.info, lineHeight: 18 },
+
+  filterRow: { marginBottom: SIZES.padding },
+  filterChip: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: SIZES.radiusFull, backgroundColor: COLORS.surfaceContainer, borderWidth: 1, borderColor: COLORS.border },
+  filterChipActive: { backgroundColor: COLORS.primaryContainer, borderColor: COLORS.primary },
+  filterChipText: { fontSize: SIZES.small, fontFamily: FONTS.semiBold, color: COLORS.textFaint },
+
+  // Claims list
+  claimsList: { paddingHorizontal: SIZES.padding, paddingBottom: SIZES.padding * 2 },
+  claimCard: { backgroundColor: COLORS.surfaceContainer, borderRadius: SIZES.radius * 1.2, borderWidth: 1, borderColor: COLORS.border, marginBottom: 12, overflow: 'hidden' },
+  claimTop: { flexDirection: 'row', alignItems: 'center', gap: 12, padding: SIZES.padding * 0.85, borderBottomWidth: 1, borderBottomColor: COLORS.border },
+  claimIconWrap: { width: 42, height: 42, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  claimType: { fontSize: SIZES.body, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 2 },
+  claimDate: { fontSize: SIZES.small, fontFamily: FONTS.medium, color: COLORS.textFaint },
+  statusBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: SIZES.radiusFull },
+  statusText: { fontSize: SIZES.tiny, fontFamily: FONTS.bold },
+  claimBottom: { flexDirection: 'row', justifyContent: 'space-around', padding: SIZES.padding * 0.75, borderBottomWidth: 1, borderBottomColor: COLORS.border },
   claimDetail: { alignItems: 'center' },
-  claimDetailLabel: { fontSize: 10, fontFamily: FONTS.bold, color: 'rgba(27,27,58,0.4)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 },
-  claimDetailValue: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent },
-  claimAmount: { color: '#16a34a' },
-  emptyState: { alignItems: 'center', padding: SIZES.padding * 2, gap: 12 },
-  emptyStateText: { fontSize: 16, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.4)' },
+  detailLabel: { fontSize: SIZES.tiny, fontFamily: FONTS.medium, color: COLORS.textFaint, marginBottom: 3, textTransform: 'uppercase', letterSpacing: 0.3 },
+  detailValue: { fontSize: SIZES.small, fontFamily: FONTS.bold, color: COLORS.white },
+  claimFooter: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: SIZES.padding * 0.6, paddingHorizontal: SIZES.padding * 0.85, backgroundColor: COLORS.successContainer },
+  claimFooterText: { fontSize: SIZES.tiny, fontFamily: FONTS.semiBold, color: COLORS.success },
+  claimFooterRejected: { flexDirection: 'row', alignItems: 'center', gap: 6, padding: SIZES.padding * 0.6, paddingHorizontal: SIZES.padding * 0.85, backgroundColor: COLORS.errorContainer },
+  claimFooterRejectedText: { fontSize: SIZES.tiny, fontFamily: FONTS.semiBold, color: COLORS.error, flex: 1 },
 });

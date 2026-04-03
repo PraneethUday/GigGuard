@@ -200,15 +200,17 @@ export default function AdminPage() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#f8fafc",
+        background: "#11131E",
         display: "flex",
         flexDirection: "column",
+        fontFamily: '"Inter", -apple-system, sans-serif',
+        color: "#E1E1F2",
       }}
     >
       <header
         style={{
-          background: "#0f172a",
-          borderBottom: "1px solid #1e293b",
+          background: "#0C0E18",
+          borderBottom: "1px solid rgba(70,69,85,0.6)",
           padding: "0 24px",
           height: 60,
           display: "flex",
@@ -306,15 +308,15 @@ export default function AdminPage() {
 
       <main style={{ flex: 1, padding: 32 }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4, color: "#E1E1F2" }}>
             Admin Dashboard
           </h1>
-          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 20 }}>
+          <p style={{ color: "#918FA1", fontSize: 14, marginBottom: 20 }}>
             Manage registered delivery partners — approve, reject, change status and tier at any time
           </p>
 
           {/* Tab nav */}
-          <div style={{ display: "flex", gap: 4, marginBottom: 24, background: "#f1f5f9", borderRadius: 10, padding: 4, width: "fit-content" }}>
+          <div style={{ display: "flex", gap: 4, marginBottom: 24, background: "#1D1F2B", borderRadius: 10, padding: 4, width: "fit-content", border: "1px solid rgba(70,69,85,0.6)" }}>
             {(["workers", "claims"] as const).map(t => (
               <button
                 key={t}
@@ -323,9 +325,10 @@ export default function AdminPage() {
                 style={{
                   padding: "7px 20px", borderRadius: 7, border: "none", cursor: "pointer",
                   fontSize: 13, fontWeight: 600,
-                  background: tab === t ? "#fff" : "transparent",
-                  color: tab === t ? "#0f172a" : "#64748b",
-                  boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.10)" : "none",
+                  background: tab === t ? "#6C63FF" : "transparent",
+                  color: tab === t ? "#fff" : "#918FA1",
+                  boxShadow: tab === t ? "0 2px 8px rgba(108,99,255,0.4)" : "none",
+                  transition: "all 0.15s",
                 }}
               >
                 {t === "workers" ? "Workers" : `Claims${claims.length ? ` (${claims.filter(c => c.status === "pending" || c.status === "under_review").length})` : ""}`}
@@ -334,7 +337,7 @@ export default function AdminPage() {
           </div>
 
           {(notice || claimNotice) && (
-            <div style={{ marginBottom: 12, background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>
+            <div style={{ marginBottom: 12, background: "#0A2E18", border: "1px solid rgba(34,197,94,0.3)", color: "#22C55E", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>
               {notice || claimNotice}
             </div>
           )}
@@ -343,9 +346,9 @@ export default function AdminPage() {
             <div
               style={{
                 marginBottom: 12,
-                background: "#fef2f2",
-                border: "1px solid #fecaca",
-                color: "#dc2626",
+                background: "#2E0A0A",
+                border: "1px solid rgba(239,68,68,0.3)",
+                color: "#EF4444",
                 fontSize: 13,
                 fontWeight: 600,
                 borderRadius: 8,
@@ -374,23 +377,23 @@ export default function AdminPage() {
 
           <div
             style={{
-              background: "#fff",
+              background: "#1D1F2B",
               borderRadius: 12,
-              border: "1px solid #e2e8f0",
+              border: "1px solid rgba(70,69,85,0.6)",
               overflow: "hidden",
             }}
           >
             <div
               style={{
                 padding: "16px 20px",
-                borderBottom: "1px solid #e2e8f0",
+                borderBottom: "1px solid rgba(70,69,85,0.6)",
                 display: "flex",
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: 12,
               }}
             >
-              <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>
+              <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "#E1E1F2" }}>
                 Registered Workers
               </h3>
               <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -398,13 +401,10 @@ export default function AdminPage() {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   style={{
-                    height: 36,
-                    padding: "0 12px",
-                    fontSize: 13,
-                    border: "1px solid #d1d5db",
-                    borderRadius: 8,
-                    outline: "none",
-                    cursor: "pointer",
+                    height: 36, padding: "0 12px", fontSize: 13,
+                    border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8,
+                    outline: "none", cursor: "pointer",
+                    background: "#323440", color: "#E1E1F2",
                   }}
                 >
                   <option value="all">All statuses</option>
@@ -417,24 +417,20 @@ export default function AdminPage() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   style={{
-                    width: 280,
-                    height: 36,
-                    padding: "0 12px",
-                    fontSize: 13,
-                    border: "1px solid #d1d5db",
-                    borderRadius: 8,
-                    outline: "none",
+                    width: 280, height: 36, padding: "0 12px", fontSize: 13,
+                    border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8,
+                    outline: "none", background: "#323440", color: "#E1E1F2",
                   }}
                 />
               </div>
             </div>
 
             {loading ? (
-              <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
+              <div style={{ padding: 40, textAlign: "center", color: "#918FA1" }}>
                 Loading workers...
               </div>
             ) : filtered.length === 0 ? (
-              <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>
+              <div style={{ padding: 40, textAlign: "center", color: "#918FA1" }}>
                 {workers.length === 0
                   ? "No workers registered yet."
                   : "No workers match your filters."}
@@ -449,7 +445,7 @@ export default function AdminPage() {
                   }}
                 >
                   <thead>
-                    <tr style={{ background: "#f8fafc" }}>
+                    <tr style={{ background: "#272935" }}>
                       {[
                         "Name",
                         "Email",
@@ -467,12 +463,12 @@ export default function AdminPage() {
                           style={{
                             padding: "10px 14px",
                             textAlign: "left",
-                            fontWeight: 600,
-                            color: "#64748b",
-                            borderBottom: "1px solid #e2e8f0",
+                            fontWeight: 700,
+                            color: "#918FA1",
+                            borderBottom: "1px solid rgba(70,69,85,0.6)",
                             fontSize: 11,
                             textTransform: "uppercase",
-                            letterSpacing: "0.04em",
+                            letterSpacing: "0.05em",
                             whiteSpace: "nowrap",
                           }}
                         >
@@ -485,24 +481,24 @@ export default function AdminPage() {
                     {filtered.map((w) => (
                       <tr
                         key={w.id}
-                        style={{ borderBottom: "1px solid #f1f5f9" }}
+                        style={{ borderBottom: "1px solid rgba(70,69,85,0.4)" }}
                       >
                         <td
                           style={{
                             padding: "12px 14px",
                             fontWeight: 600,
-                            color: "#0f172a",
+                            color: "#E1E1F2",
                           }}
                         >
                           {w.name}
                         </td>
-                        <td style={{ padding: "12px 14px", color: "#64748b", fontSize: 12 }}>
+                        <td style={{ padding: "12px 14px", color: "#918FA1", fontSize: 12 }}>
                           {w.email}
                         </td>
-                        <td style={{ padding: "12px 14px", color: "#64748b" }}>
+                        <td style={{ padding: "12px 14px", color: "#C7C4D8" }}>
                           {w.city}
                         </td>
-                        <td style={{ padding: "12px 14px", color: "#64748b", fontSize: 11, fontFamily: "monospace" }}>
+                        <td style={{ padding: "12px 14px", color: "#918FA1", fontSize: 11, fontFamily: "monospace" }}>
                           {w.delivery_id?.slice(0, 12)}...
                         </td>
                         <td style={{ padding: "12px 14px" }}>
@@ -517,12 +513,12 @@ export default function AdminPage() {
                               <span
                                 key={p}
                                 style={{
-                                  background: "#eef2ff",
-                                  color: "#4f46e5",
-                                  padding: "2px 6px",
+                                  background: "#1D1B45",
+                                  color: "#8B84FF",
+                                  padding: "2px 8px",
                                   borderRadius: 4,
                                   fontSize: 10,
-                                  fontWeight: 600,
+                                  fontWeight: 700,
                                 }}
                               >
                                 {PLATFORM_NAMES[p] || p}
@@ -542,20 +538,15 @@ export default function AdminPage() {
                               borderRadius: 6,
                               fontSize: 12,
                               fontWeight: 600,
-                              border: "1px solid #d1d5db",
+                              border: "1px solid rgba(70,69,85,0.6)",
                               cursor: "pointer",
-                              background:
-                                w.tier === "pro"
-                                  ? "#faf5ff"
-                                  : w.tier === "standard"
-                                    ? "#eef2ff"
-                                    : "#f0fdf4",
+                              background: "#323440",
                               color:
                                 w.tier === "pro"
-                                  ? "#7c3aed"
+                                  ? "#c084fc"
                                   : w.tier === "standard"
-                                    ? "#4f46e5"
-                                    : "#16a34a",
+                                    ? "#6C63FF"
+                                    : "#22C55E",
                             }}
                           >
                             {TIER_OPTIONS.map((t) => (
@@ -648,7 +639,7 @@ export default function AdminPage() {
                         <td
                           style={{
                             padding: "12px 14px",
-                            color: "#64748b",
+                            color: "#918FA1",
                             fontSize: 12,
                             whiteSpace: "nowrap",
                           }}
@@ -671,12 +662,12 @@ export default function AdminPage() {
           {tab === "claims" && (
             <div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
-                <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0 }}>Insurance Claims</h3>
+                <h3 style={{ fontSize: 15, fontWeight: 600, margin: 0, color: "#E1E1F2" }}>Insurance Claims</h3>
                 <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                   <select
                     value={claimStatusFilter}
                     onChange={e => setClaimStatusFilter(e.target.value)}
-                    style={{ height: 36, padding: "0 12px", fontSize: 13, border: "1px solid #d1d5db", borderRadius: 8, outline: "none", cursor: "pointer" }}
+                    style={{ height: 36, padding: "0 12px", fontSize: 13, border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8, outline: "none", cursor: "pointer", background: "#323440", color: "#E1E1F2" }}
                   >
                     <option value="all">All statuses</option>
                     <option value="pending">Pending</option>
@@ -685,22 +676,22 @@ export default function AdminPage() {
                     <option value="paid">Paid</option>
                     <option value="rejected">Rejected</option>
                   </select>
-                  <button type="button" onClick={fetchClaims} style={{ height: 36, padding: "0 14px", fontSize: 12, fontWeight: 600, background: "#1e293b", color: "#94a3b8", border: "1px solid #334155", borderRadius: 6, cursor: "pointer" }}>Refresh</button>
+                  <button type="button" onClick={fetchClaims} style={{ height: 36, padding: "0 14px", fontSize: 12, fontWeight: 600, background: "#1D1F2B", color: "#918FA1", border: "1px solid rgba(70,69,85,0.6)", borderRadius: 6, cursor: "pointer" }}>Refresh</button>
                 </div>
               </div>
 
               {claimsLoading ? (
-                <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>Loading claims...</div>
+                <div style={{ padding: 40, textAlign: "center", color: "#918FA1" }}>Loading claims...</div>
               ) : (
-                <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", overflow: "hidden" }}>
+                <div style={{ background: "#1D1F2B", borderRadius: 12, border: "1px solid rgba(70,69,85,0.6)", overflow: "hidden" }}>
                   {claims.filter(c => claimStatusFilter === "all" || c.status === claimStatusFilter).length === 0 ? (
-                    <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>No claims found.</div>
+                    <div style={{ padding: 40, textAlign: "center", color: "#918FA1" }}>No claims found.</div>
                   ) : (
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                       <thead>
-                        <tr style={{ background: "#f8fafc" }}>
+                        <tr style={{ background: "#272935" }}>
                           {["Worker", "Type", "Date", "Claimed", "Approved", "Status", "Actions"].map(h => (
-                            <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "#64748b", borderBottom: "1px solid #e2e8f0", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
+                            <th key={h} style={{ padding: "10px 14px", textAlign: "left", fontWeight: 700, color: "#918FA1", borderBottom: "1px solid rgba(70,69,85,0.6)", fontSize: 11, textTransform: "uppercase", letterSpacing: "0.05em", whiteSpace: "nowrap" }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -709,12 +700,12 @@ export default function AdminPage() {
                           .filter(c => claimStatusFilter === "all" || c.status === claimStatusFilter)
                           .map(c => (
                           <>
-                            <tr key={c.id} style={{ borderBottom: expandedClaim === c.id ? "none" : "1px solid #f1f5f9" }}>
-                              <td style={{ padding: "12px 14px", fontWeight: 600, color: "#0f172a" }}>{c.worker_name}</td>
-                              <td style={{ padding: "12px 14px", color: "#374151" }}>{CLAIM_TYPE_LABELS[c.claim_type] || c.claim_type}</td>
-                              <td style={{ padding: "12px 14px", color: "#64748b" }}>{c.incident_date}</td>
-                              <td style={{ padding: "12px 14px", fontWeight: 600 }}>₹{c.claim_amount}</td>
-                              <td style={{ padding: "12px 14px", color: c.approved_amount ? "#16a34a" : "#64748b", fontWeight: c.approved_amount ? 700 : 400 }}>
+                            <tr key={c.id} style={{ borderBottom: expandedClaim === c.id ? "none" : "1px solid rgba(70,69,85,0.4)" }}>
+                              <td style={{ padding: "12px 14px", fontWeight: 600, color: "#E1E1F2" }}>{c.worker_name}</td>
+                              <td style={{ padding: "12px 14px", color: "#C7C4D8" }}>{CLAIM_TYPE_LABELS[c.claim_type] || c.claim_type}</td>
+                              <td style={{ padding: "12px 14px", color: "#918FA1" }}>{c.incident_date}</td>
+                              <td style={{ padding: "12px 14px", fontWeight: 600, color: "#E1E1F2" }}>₹{c.claim_amount}</td>
+                              <td style={{ padding: "12px 14px", color: c.approved_amount ? "#22C55E" : "#918FA1", fontWeight: c.approved_amount ? 700 : 400 }}>
                                 {c.approved_amount ? `₹${c.approved_amount}` : "—"}
                               </td>
                               <td style={{ padding: "12px 14px" }}>
@@ -735,34 +726,34 @@ export default function AdminPage() {
                               </td>
                             </tr>
                             {expandedClaim === c.id && (
-                              <tr key={`${c.id}-expand`} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                                <td colSpan={7} style={{ padding: "0 14px 16px", background: "#f8fafc" }}>
+                              <tr key={`${c.id}-expand`} style={{ borderBottom: "1px solid rgba(70,69,85,0.4)" }}>
+                                <td colSpan={7} style={{ padding: "0 14px 16px", background: "#272935" }}>
                                   <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, paddingTop: 12 }}>
                                     <div>
-                                      <div style={{ fontSize: 11, fontWeight: 600, color: "#64748b", textTransform: "uppercase", marginBottom: 6 }}>Description</div>
-                                      <p style={{ fontSize: 13, color: "#374151", margin: 0, lineHeight: 1.5 }}>{c.description}</p>
-                                      {c.upi && <p style={{ fontSize: 12, color: "#64748b", marginTop: 8 }}>UPI: <strong>{c.upi}</strong></p>}
-                                      {c.razorpay_payout_id && <p style={{ fontSize: 11, fontFamily: "monospace", color: "#64748b", marginTop: 4 }}>Payout ID: {c.razorpay_payout_id}</p>}
+                                      <div style={{ fontSize: 11, fontWeight: 700, color: "#918FA1", textTransform: "uppercase", marginBottom: 6, letterSpacing: "0.05em" }}>Description</div>
+                                      <p style={{ fontSize: 13, color: "#C7C4D8", margin: 0, lineHeight: 1.5 }}>{c.description}</p>
+                                      {c.upi && <p style={{ fontSize: 12, color: "#918FA1", marginTop: 8 }}>UPI: <strong style={{ color: "#E1E1F2" }}>{c.upi}</strong></p>}
+                                      {c.razorpay_payout_id && <p style={{ fontSize: 11, fontFamily: "monospace", color: "#918FA1", marginTop: 4 }}>Payout ID: {c.razorpay_payout_id}</p>}
                                     </div>
                                     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                                       <div>
-                                        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>Approved amount (₹)</label>
+                                        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#918FA1", marginBottom: 4 }}>Approved amount (₹)</label>
                                         <input
                                           type="number"
                                           placeholder={`Max ₹${c.claim_amount}`}
                                           value={approveAmounts[c.id] ?? ""}
                                           onChange={e => setApproveAmounts(prev => ({ ...prev, [c.id]: e.target.value }))}
-                                          style={{ width: "100%", height: 36, padding: "0 10px", fontSize: 13, border: "1px solid #d1d5db", borderRadius: 8, outline: "none", boxSizing: "border-box" }}
+                                          style={{ width: "100%", height: 36, padding: "0 10px", fontSize: 13, border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8, outline: "none", boxSizing: "border-box", background: "#323440", color: "#E1E1F2" }}
                                         />
                                       </div>
                                       <div>
-                                        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#64748b", marginBottom: 4 }}>Admin notes</label>
+                                        <label style={{ display: "block", fontSize: 11, fontWeight: 600, color: "#918FA1", marginBottom: 4 }}>Admin notes</label>
                                         <input
                                           type="text"
                                           placeholder="Optional note for worker"
                                           value={adminNotes[c.id] ?? ""}
                                           onChange={e => setAdminNotes(prev => ({ ...prev, [c.id]: e.target.value }))}
-                                          style={{ width: "100%", height: 36, padding: "0 10px", fontSize: 13, border: "1px solid #d1d5db", borderRadius: 8, outline: "none", boxSizing: "border-box" }}
+                                          style={{ width: "100%", height: 36, padding: "0 10px", fontSize: 13, border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8, outline: "none", boxSizing: "border-box", background: "#323440", color: "#E1E1F2" }}
                                         />
                                       </div>
                                       <div style={{ display: "flex", gap: 6 }}>
@@ -791,11 +782,11 @@ export default function AdminPage() {
 
 function ClaimBadge({ status }: { status: string }) {
   const styles: Record<string, React.CSSProperties> = {
-    pending:      { background: "#fffbeb", color: "#d97706", border: "1px solid #fde68a" },
-    under_review: { background: "#eff6ff", color: "#2563eb", border: "1px solid #bfdbfe" },
-    approved:     { background: "#f0fdf4", color: "#16a34a", border: "1px solid #86efac" },
-    rejected:     { background: "#fef2f2", color: "#dc2626", border: "1px solid #fecaca" },
-    paid:         { background: "#faf5ff", color: "#7c3aed", border: "1px solid #ddd6fe" },
+    pending:      { background: "#2A1A0A", color: "#FF8C42", border: "1px solid rgba(255,140,66,0.3)" },
+    under_review: { background: "#0a1a3a", color: "#3B82F6", border: "1px solid rgba(59,130,246,0.3)" },
+    approved:     { background: "#0A2E18", color: "#22C55E", border: "1px solid rgba(34,197,94,0.3)" },
+    rejected:     { background: "#2E0A0A", color: "#EF4444", border: "1px solid rgba(239,68,68,0.3)" },
+    paid:         { background: "#1D1B45", color: "#6C63FF", border: "1px solid rgba(108,99,255,0.3)" },
   };
   const labels: Record<string, string> = {
     pending: "Pending", under_review: "Under Review", approved: "Approved", rejected: "Rejected", paid: "Paid",

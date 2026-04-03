@@ -205,8 +205,8 @@ export default function ControlCenterPage() {
   };
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f8fafc", display: "flex", flexDirection: "column" }}>
-      <header style={{ background: "#0f172a", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+    <div style={{ minHeight: "100vh", background: "#11131E", display: "flex", flexDirection: "column", fontFamily: '"Inter", -apple-system, sans-serif', color: "#E1E1F2" }}>
+      <header style={{ background: "#0C0E18", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(70,69,85,0.6)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <div style={{ width: 36, height: 36, background: "#4f46e5", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>GG</div>
           <span style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>GigGuard</span>
@@ -221,16 +221,16 @@ export default function ControlCenterPage() {
 
       <main style={{ flex: 1, padding: 32 }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4 }}>Backend Control Center</h1>
-          <p style={{ color: "#64748b", fontSize: 14, marginBottom: 24 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, marginBottom: 4, color: "#E1E1F2" }}>Backend Control Center</h1>
+          <p style={{ color: "#918FA1", fontSize: 14, marginBottom: 24 }}>
             Monitor data, adjust income parameters, retrain the ML model, and test premium predictions.
           </p>
 
-          {actionMsg && <div style={{ marginBottom: 12, background: "#f0fdf4", border: "1px solid #86efac", color: "#166534", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>{actionMsg}</div>}
-          {actionErr && <div style={{ marginBottom: 12, background: "#fef2f2", border: "1px solid #fecaca", color: "#dc2626", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>{actionErr}</div>}
+          {actionMsg && <div style={{ marginBottom: 12, background: "#0A2E18", border: "1px solid rgba(34,197,94,0.3)", color: "#22C55E", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>{actionMsg}</div>}
+          {actionErr && <div style={{ marginBottom: 12, background: "#2E0A0A", border: "1px solid rgba(239,68,68,0.3)", color: "#EF4444", fontSize: 13, fontWeight: 600, borderRadius: 8, padding: "8px 12px" }}>{actionErr}</div>}
 
           {loading ? (
-            <div style={{ padding: 40, textAlign: "center", color: "#64748b" }}>Loading backend data...</div>
+            <div style={{ padding: 40, textAlign: "center", color: "#918FA1" }}>Loading backend data...</div>
           ) : (
             <>
               {/* Quick Actions */}
@@ -314,23 +314,23 @@ export default function ControlCenterPage() {
                 )}
                 {modelStatus?.tiers && (
                   <div style={{ marginTop: 16 }}>
-                    <h4 style={{ fontSize: 13, fontWeight: 600, color: "#374151", marginBottom: 8 }}>Tier Configuration</h4>
+                    <h4 style={{ fontSize: 13, fontWeight: 600, color: "#C7C4D8", marginBottom: 8 }}>Tier Configuration</h4>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                       <thead>
-                        <tr style={{ background: "#f8fafc" }}>
+                        <tr style={{ background: "#272935" }}>
                           {["Tier", "Rate", "Min Premium", "Max Premium", "Max Payout"].map(h => (
-                            <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#64748b", borderBottom: "1px solid #e2e8f0", fontSize: 11, textTransform: "uppercase" }}>{h}</th>
+                            <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#918FA1", borderBottom: "1px solid rgba(70,69,85,0.6)", fontSize: 11, textTransform: "uppercase" }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {Object.entries(modelStatus.tiers).map(([tier, cfg]) => (
-                          <tr key={tier} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                            <td style={{ padding: "8px 12px", fontWeight: 600 }}>{tier.charAt(0).toUpperCase() + tier.slice(1)}</td>
-                            <td style={{ padding: "8px 12px" }}>{(cfg.rate * 100).toFixed(1)}%</td>
-                            <td style={{ padding: "8px 12px" }}>{cfg.min}</td>
-                            <td style={{ padding: "8px 12px" }}>{cfg.max}</td>
-                            <td style={{ padding: "8px 12px" }}>{cfg.max_payout}</td>
+                          <tr key={tier} style={{ borderBottom: "1px solid rgba(70,69,85,0.4)" }}>
+                            <td style={{ padding: "8px 12px", fontWeight: 600, color: "#E1E1F2" }}>{tier.charAt(0).toUpperCase() + tier.slice(1)}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{(cfg.rate * 100).toFixed(1)}%</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{cfg.min}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{cfg.max}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{cfg.max_payout}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -350,22 +350,22 @@ export default function ControlCenterPage() {
                     </div>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
                       <thead>
-                        <tr style={{ background: "#f8fafc" }}>
+                        <tr style={{ background: "#272935" }}>
                           {["Platform", "Workers", "Avg Earnings", "Min", "Max", "Avg Deliveries", "Total Earnings"].map(h => (
-                            <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontWeight: 600, color: "#64748b", borderBottom: "1px solid #e2e8f0", fontSize: 11, textTransform: "uppercase" }}>{h}</th>
+                            <th key={h} style={{ padding: "8px 12px", textAlign: "left", fontWeight: 700, color: "#918FA1", borderBottom: "1px solid rgba(70,69,85,0.6)", fontSize: 11, textTransform: "uppercase" }}>{h}</th>
                           ))}
                         </tr>
                       </thead>
                       <tbody>
                         {dataSummary.platforms.map(p => (
-                          <tr key={p.platform} style={{ borderBottom: "1px solid #f1f5f9" }}>
-                            <td style={{ padding: "8px 12px", fontWeight: 600 }}>{p.platform}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.worker_count}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.avg_earnings}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.min_earnings}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.max_earnings}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.avg_deliveries}</td>
-                            <td style={{ padding: "8px 12px" }}>{p.total_earnings}</td>
+                          <tr key={p.platform} style={{ borderBottom: "1px solid rgba(70,69,85,0.4)" }}>
+                            <td style={{ padding: "8px 12px", fontWeight: 600, color: "#E1E1F2" }}>{p.platform}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.worker_count}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.avg_earnings}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.min_earnings}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.max_earnings}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.avg_deliveries}</td>
+                            <td style={{ padding: "8px 12px", color: "#C7C4D8" }}>{p.total_earnings}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -439,8 +439,8 @@ export default function ControlCenterPage() {
                   </div>
                 </div>
                 {premiumResult && (
-                  <div style={{ background: "#f0fdf4", border: "1px solid #86efac", borderRadius: 10, padding: 20, marginTop: 8 }}>
-                    <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, color: "#166534" }}>Premium Result</h4>
+                  <div style={{ background: "#1D1B45", border: "1px solid rgba(108,99,255,0.3)", borderRadius: 10, padding: 20, marginTop: 8 }}>
+                    <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12, color: "#8B84FF" }}>Premium Result</h4>
                     <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12, fontSize: 13 }}>
                       <ResultItem label="Weekly Premium" value={`${premiumResult.weekly_premium}`} />
                       <ResultItem label="With AutoPay" value={`${premiumResult.weekly_premium_autopay}`} />
@@ -463,15 +463,15 @@ export default function ControlCenterPage() {
   );
 }
 
-const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 4 };
-const inputStyle: React.CSSProperties = { width: "100%", height: 38, padding: "0 10px", fontSize: 13, border: "1px solid #d1d5db", borderRadius: 8, outline: "none" };
+const labelStyle: React.CSSProperties = { display: "block", fontSize: 12, fontWeight: 600, color: "#918FA1", marginBottom: 4 };
+const inputStyle: React.CSSProperties = { width: "100%", height: 38, padding: "0 10px", fontSize: 13, border: "1px solid rgba(70,69,85,0.6)", borderRadius: 8, outline: "none", background: "#323440", color: "#E1E1F2" };
 const selectStyle: React.CSSProperties = { ...inputStyle, cursor: "pointer" };
 const btnStyle: React.CSSProperties = { height: 38, color: "#fff", border: "none", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", padding: "0 16px" };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", padding: 24, marginBottom: 24 }}>
-      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#0f172a" }}>{title}</h3>
+    <div style={{ background: "#1D1F2B", borderRadius: 12, border: "1px solid rgba(70,69,85,0.6)", padding: 24, marginBottom: 24 }}>
+      <h3 style={{ fontSize: 16, fontWeight: 700, marginBottom: 16, color: "#E1E1F2" }}>{title}</h3>
       {children}
     </div>
   );
@@ -481,9 +481,9 @@ function ActionCard({ title, desc, btnLabel, disabled, onClick, color }: {
   title: string; desc: string; btnLabel: string; disabled: boolean; onClick: () => void; color: string;
 }) {
   return (
-    <div style={{ background: "#fff", borderRadius: 12, border: "1px solid #e2e8f0", padding: 20 }}>
-      <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: "#0f172a" }}>{title}</h3>
-      <p style={{ fontSize: 12, color: "#64748b", marginBottom: 14, lineHeight: 1.5 }}>{desc}</p>
+    <div style={{ background: "#1D1F2B", borderRadius: 12, border: "1px solid rgba(70,69,85,0.6)", padding: 20 }}>
+      <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, color: "#E1E1F2" }}>{title}</h3>
+      <p style={{ fontSize: 12, color: "#918FA1", marginBottom: 14, lineHeight: 1.5 }}>{desc}</p>
       <button type="button" disabled={disabled} onClick={onClick} style={{ background: color, color: "#fff", border: "none", borderRadius: 8, padding: "8px 18px", fontSize: 13, fontWeight: 600, cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.6 : 1, width: "100%" }}>
         {btnLabel}
       </button>
@@ -493,9 +493,9 @@ function ActionCard({ title, desc, btnLabel, disabled, onClick, color }: {
 
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
-    <div style={{ background: "#f8fafc", borderRadius: 8, padding: "12px 16px", border: "1px solid #e2e8f0" }}>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 500, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "#0f172a" }}>{value}</div>
+    <div style={{ background: "#272935", borderRadius: 8, padding: "12px 16px", border: "1px solid rgba(70,69,85,0.6)" }}>
+      <div style={{ fontSize: 11, color: "#918FA1", fontWeight: 600, textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: "#E1E1F2" }}>{value}</div>
     </div>
   );
 }
@@ -503,8 +503,8 @@ function InfoCard({ label, value }: { label: string; value: string }) {
 function ResultItem({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div style={{ fontSize: 11, color: "#64748b", fontWeight: 500 }}>{label}</div>
-      <div style={{ fontSize: 14, fontWeight: 700, color: "#0f172a" }}>{value}</div>
+      <div style={{ fontSize: 11, color: "#918FA1", fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: 14, fontWeight: 700, color: "#E1E1F2" }}>{value}</div>
     </div>
   );
 }
