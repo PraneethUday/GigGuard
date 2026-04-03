@@ -1,26 +1,75 @@
-import React from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { COLORS, FONTS, SIZES } from '../constants/theme';
+import { useAuth } from '../context/AuthContext';
+import * as api from '../lib/api';
 
-const triggers = [
-  { icon: 'rainy-outline', label: 'Heavy Rainfall', threshold: '>64.5mm/24h', active: true },
-  { icon: 'cloud-outline', label: 'Air Pollution (AQI)', threshold: 'AQI > 400', active: true },
-  { icon: 'ban-outline', label: 'Curfew / Sec. 144', threshold: 'Official Order', active: true },
-  { icon: 'water-outline', label: 'Flood / Waterlogging', threshold: 'Zone Tagged', active: true },
-  { icon: 'thermometer-outline', label: 'Extreme Heat', threshold: '>45°C', active: true },
-];
+const TIERS = ['basic', 'standard', 'pro'];
+const PLAN_DETAILS = {
+  basic:    { label: 'Basic Shield',   tag: 'Low-cost entry cover' },
+  standard: { label: 'Standard Guard', tag: 'Balanced weekly protection' },
+  pro:      { label: 'Pro Protect',    tag: 'Highest payout priority' },
+};
 
-const premiumRows = [
-  { label: 'Base Premium (3.5% × ₹2,800)', value: '₹98' },
-  { label: 'Zone Risk (Moderate)', value: '×1.05' },
-  { label: 'Weather Forecast', value: '×1.10' },
-  { label: 'Loyalty Discount (8wks)', value: '−8%' },
-  { label: 'AutoPay Discount', value: '−5%' },
-  { label: 'Final Premium', value: '₹99', bold: true },
+const TRIGGERS = [
+  { icon: 'rainy-outline',       label: 'Heavy Rainfall',      threshold: '>64.5mm/24h' },
+  { icon: 'cloud-outline',       label: 'Air Pollution (AQI)',  threshold: 'AQI > 400' },
+  { icon: 'ban-outline',         label: 'Curfew / Sec. 144',   threshold: 'Official Order' },
+  { icon: 'water-outline',       label: 'Flood / Waterlogging', threshold: 'Zone Tagged' },
+  { icon: 'thermometer-outline', label: 'Extreme Heat',         threshold: '>45°C' },
 ];
 
 export default function PolicyScreen({ navigation }) {
+  const { user } = useAuth();
+  const [currentPremium, setCurrentPremium] = useState(null);
+  const [quotes, setQuotes] = useState({});
+  const [nextWeekTier, setNextWeekTier] = useState(user?.tier || 'standard');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!user?.delivery_id) { setLoading(false); return; }
+
+    // Load saved next-week plan
+    AsyncStorage.getItem(`gg_next_week_plan_${user.id}`)
+      .then(saved => { if (saved && TIERS.includes(saved)) setNextWeekTier(saved); })
+      .catch(() => {});
+
+    // Fetch current tier premium
+    api.predictPremium(user.delivery_id, user.city, user.tier || 'standard')
+      .then(setCurrentPremium)
+      .catch(() => {});
+
+    // Fetch all tier quotes
+    Promise.allSettled(
+      TIERS.map(t => api.predictPremium(user.delivery_id, user.city, t).then(q => [t, q]))
+    ).then(results => {
+      const q = {};
+      results.forEach(r => { if (r.status === 'fulfilled') { const [t, data] = r.value; q[t] = data; } });
+      setQuotes(q);
+    }).finally(() => setLoading(false));
+  }, [user]);
+
+  const selectNextWeek = (tier) => {
+    setNextWeekTier(tier);
+    if (user?.id) AsyncStorage.setItem(`gg_next_week_plan_${user.id}`, tier).catch(() => {});
+  };
+
+  const currentTier = user?.tier || 'standard';
+  const tierLabel = PLAN_DETAILS[currentTier]?.label || 'Standard Guard';
+  const verified = user?.verification_status === 'verified';
+  const wp = currentPremium ? (user?.autopay ? currentPremium.weekly_premium_autopay : currentPremium.weekly_premium) : null;
+  const platformCount = user?.platforms?.length || 0;
+
+  const premiumRows = currentPremium ? [
+    { label: `Base premium`, value: `₹${currentPremium.raw_prediction || '-'}` },
+    { label: 'Weather risk factor', value: currentPremium.weather_risk != null ? `×${(1 + currentPremium.weather_risk).toFixed(2)}` : '-' },
+    { label: 'City risk factor', value: currentPremium.city_risk != null ? `×${currentPremium.city_risk.toFixed(2)}` : '-' },
+    ...(user?.autopay ? [{ label: 'AutoPay discount', value: '−5%' }] : []),
+    { label: 'Final weekly premium', value: wp != null ? `₹${Math.round(wp)}` : '-', bold: true },
+  ] : [];
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
@@ -32,63 +81,83 @@ export default function PolicyScreen({ navigation }) {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+        {loading && <ActivityIndicator size="small" color={COLORS.primary} style={{ marginBottom: 16 }} />}
+
         {/* Active Policy Card */}
         <View style={styles.policyCard}>
           <View style={styles.policyCardTop}>
             <View>
               <Text style={styles.policyCardLabel}>ACTIVE POLICY</Text>
-              <Text style={styles.policyCardTier}>Standard Guard</Text>
-              <Text style={styles.policyCardId}>GG-2026-44821</Text>
+              <Text style={styles.policyCardTier}>{tierLabel}</Text>
+              <Text style={styles.policyCardId}>{user?.city || ''} · {user?.delivery_id || ''}</Text>
             </View>
-            <View style={styles.activeBadge}>
-              <Text style={styles.activeBadgeText}>Protected ✓</Text>
+            <View style={[styles.activeBadge, !verified && { backgroundColor: '#d97706' }]}>
+              <Text style={styles.activeBadgeText}>{verified ? 'Protected ✓' : 'Pending'}</Text>
             </View>
           </View>
           <View style={styles.policyStats}>
-            {[
-              { label: 'Weekly Premium', value: '₹99' },
-              { label: 'Max Payout', value: '₹1,200' },
-              { label: 'Platforms', value: '2 Active' },
-            ].map((s, i) => (
-              <View key={i} style={styles.policyStat}>
-                <Text style={styles.policyStatLabel}>{s.label}</Text>
-                <Text style={styles.policyStatValue}>{s.value}</Text>
-              </View>
-            ))}
+            <View style={styles.policyStat}>
+              <Text style={styles.policyStatLabel}>Weekly Premium</Text>
+              <Text style={styles.policyStatValue}>{wp != null ? `₹${Math.round(wp)}` : '...'}</Text>
+            </View>
+            <View style={styles.policyStat}>
+              <Text style={styles.policyStatLabel}>Max Payout</Text>
+              <Text style={styles.policyStatValue}>{currentPremium?.max_payout ? `₹${currentPremium.max_payout.toLocaleString()}` : '...'}</Text>
+            </View>
+            <View style={styles.policyStat}>
+              <Text style={styles.policyStatLabel}>Platforms</Text>
+              <Text style={styles.policyStatValue}>{platformCount} Active</Text>
+            </View>
           </View>
         </View>
 
         {/* Premium Breakdown */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Ionicons name="calculator-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>Premium Breakdown</Text>
-          </View>
-          {premiumRows.map((row, i) => (
-            <View key={i} style={[styles.premiumRow, i === premiumRows.length - 1 && styles.premiumRowLast]}>
-              <Text style={styles.premiumLabel}>{row.label}</Text>
-              <Text style={[styles.premiumValue, row.bold && styles.premiumValueBold]}>{row.value}</Text>
+        {premiumRows.length > 0 && (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Ionicons name="calculator-outline" size={20} color={COLORS.primary} />
+              <Text style={styles.sectionTitle}>Premium Breakdown</Text>
             </View>
-          ))}
-        </View>
+            {premiumRows.map((row, i) => (
+              <View key={i} style={[styles.premiumRow, i === premiumRows.length - 1 && styles.premiumRowLast]}>
+                <Text style={styles.premiumLabel}>{row.label}</Text>
+                <Text style={[styles.premiumValue, row.bold && styles.premiumValueBold]}>{row.value}</Text>
+              </View>
+            ))}
+          </View>
+        )}
 
-        {/* Loyalty Progress */}
+        {/* Next Week Plan Selection */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Ionicons name="star-outline" size={20} color={COLORS.primary} />
-            <Text style={styles.sectionTitle}>Loyalty Progress</Text>
+            <Ionicons name="calendar-outline" size={20} color={COLORS.primary} />
+            <Text style={styles.sectionTitle}>Next Week Plan</Text>
           </View>
-          <View style={styles.loyaltyInfo}>
-            <Text style={styles.loyaltyWeeks}>8 weeks</Text>
-            <Text style={styles.loyaltyDiscount}>8% discount</Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: '53%' }]} />
-          </View>
-          <View style={styles.progressLabels}>
-            <Text style={styles.progressLabel}>0 wks</Text>
-            <Text style={styles.progressLabel}>15 wks → 15% max</Text>
-          </View>
+          {TIERS.map((t) => {
+            const q = quotes[t];
+            const selected = t === nextWeekTier;
+            const price = q ? (user?.autopay ? q.weekly_premium_autopay : q.weekly_premium) : null;
+            return (
+              <TouchableOpacity
+                key={t}
+                style={[styles.tierCard, selected && styles.tierCardSelected]}
+                onPress={() => selectNextWeek(t)}
+              >
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.tierLabel, selected && { color: COLORS.white }]}>
+                    {PLAN_DETAILS[t].label}
+                  </Text>
+                  <Text style={[styles.tierSub, selected && { color: 'rgba(255,255,255,0.7)' }]}>
+                    {price != null ? `₹${Math.round(price)}/wk` : 'Loading...'}
+                    {q?.max_payout ? ` · Max ₹${q.max_payout.toLocaleString()}` : ''}
+                  </Text>
+                </View>
+                <View style={[styles.radioOuter, selected && { borderColor: COLORS.white }]}>
+                  {selected && <View style={styles.radioInner} />}
+                </View>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         {/* Coverage Triggers */}
@@ -97,7 +166,7 @@ export default function PolicyScreen({ navigation }) {
             <Ionicons name="shield-checkmark-outline" size={20} color={COLORS.primary} />
             <Text style={styles.sectionTitle}>Coverage Triggers</Text>
           </View>
-          {triggers.map((t, i) => (
+          {TRIGGERS.map((t, i) => (
             <View key={i} style={styles.triggerRow}>
               <View style={styles.triggerIcon}>
                 <Ionicons name={t.icon} size={18} color={COLORS.primary} />
@@ -120,11 +189,11 @@ export default function PolicyScreen({ navigation }) {
             <Text style={styles.sectionTitle}>Policy Details</Text>
           </View>
           {[
-            ['Policy Number', 'GG-2026-44821'],
-            ['Coverage Start', '20 Jan 2026'],
-            ['Valid Until', '31 Dec 2026'],
-            ['Zone', 'Chennai South'],
-            ['Platforms', 'Zomato, Amazon Flex'],
+            ['Delivery ID', user?.delivery_id || '-'],
+            ['City / Zone', `${user?.city || '-'}${user?.area ? ` · ${user.area}` : ''}`],
+            ['Platforms', (user?.platforms || []).join(', ') || '-'],
+            ['Tier', tierLabel],
+            ['Verification', verified ? 'Verified' : 'Pending'],
           ].map(([k, v]) => (
             <View key={k} style={styles.detailRow}>
               <Text style={styles.detailKey}>{k}</Text>
@@ -143,7 +212,8 @@ const styles = StyleSheet.create({
   backBtn: { width: 40, height: 40, justifyContent: 'center' },
   headerTitle: { fontSize: 18, fontFamily: FONTS.bold, color: COLORS.white },
   scroll: { padding: SIZES.padding, paddingBottom: SIZES.padding * 3 },
-  policyCard: { background: COLORS.secondary, borderRadius: SIZES.radius * 1.5, padding: SIZES.padding, marginBottom: SIZES.padding, overflow: 'hidden', backgroundColor: COLORS.secondary },
+
+  policyCard: { backgroundColor: COLORS.secondary, borderRadius: SIZES.radius * 1.5, padding: SIZES.padding, marginBottom: SIZES.padding, overflow: 'hidden' },
   policyCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: SIZES.padding },
   policyCardLabel: { fontSize: 10, fontFamily: FONTS.bold, color: 'rgba(255,255,255,0.5)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 4 },
   policyCardTier: { fontSize: 20, fontFamily: FONTS.bold, color: COLORS.white, marginBottom: 2 },
@@ -154,21 +224,28 @@ const styles = StyleSheet.create({
   policyStat: {},
   policyStatLabel: { fontSize: 10, fontFamily: FONTS.bold, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 4 },
   policyStatValue: { fontSize: 17, fontFamily: FONTS.bold, color: COLORS.white },
+
   section: { backgroundColor: COLORS.surface, borderRadius: SIZES.radius, padding: SIZES.padding, marginBottom: SIZES.base * 2, borderWidth: 1, borderColor: 'rgba(27,27,58,0.06)' },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: SIZES.padding * 0.75 },
   sectionTitle: { fontSize: 16, fontFamily: FONTS.bold, color: COLORS.accent, marginLeft: 8 },
+
   premiumRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.06)' },
   premiumRowLast: { borderBottomWidth: 0 },
   premiumLabel: { fontSize: 14, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.6)', flex: 1 },
   premiumValue: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent },
   premiumValueBold: { fontSize: 16, color: COLORS.primary },
-  loyaltyInfo: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: SIZES.base },
-  loyaltyWeeks: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.accent },
-  loyaltyDiscount: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.primary },
-  progressTrack: { height: 10, backgroundColor: 'rgba(27,27,58,0.08)', borderRadius: 100, overflow: 'hidden', marginBottom: SIZES.base },
-  progressFill: { height: '100%', backgroundColor: COLORS.primary, borderRadius: 100 },
-  progressLabels: { flexDirection: 'row', justifyContent: 'space-between' },
-  progressLabel: { fontSize: 11, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.4)' },
+
+  tierCard: {
+    flexDirection: 'row', alignItems: 'center', padding: SIZES.padding * 0.75,
+    borderRadius: SIZES.radius, borderWidth: 1.5, borderColor: 'rgba(27,27,58,0.1)',
+    marginBottom: SIZES.base, backgroundColor: COLORS.surface,
+  },
+  tierCardSelected: { backgroundColor: COLORS.secondary, borderColor: COLORS.secondary },
+  tierLabel: { fontSize: 15, fontFamily: FONTS.bold, color: COLORS.accent },
+  tierSub: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.5)', marginTop: 2 },
+  radioOuter: { width: 22, height: 22, borderRadius: 11, borderWidth: 2, borderColor: 'rgba(27,27,58,0.2)', justifyContent: 'center', alignItems: 'center' },
+  radioInner: { width: 10, height: 10, borderRadius: 5, backgroundColor: COLORS.white },
+
   triggerRow: { flexDirection: 'row', alignItems: 'center', paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.05)' },
   triggerIcon: { width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(165,28,48,0.08)', justifyContent: 'center', alignItems: 'center', marginRight: 12 },
   triggerInfo: { flex: 1 },
@@ -176,6 +253,7 @@ const styles = StyleSheet.create({
   triggerThreshold: { fontSize: 12, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.45)', marginTop: 2 },
   triggerActiveBadge: { backgroundColor: 'rgba(34,197,94,0.1)', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 100 },
   triggerActiveBadgeText: { fontSize: 11, fontFamily: FONTS.bold, color: '#16a34a' },
+
   detailRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: 'rgba(27,27,58,0.05)' },
   detailKey: { fontSize: 14, fontFamily: FONTS.medium, color: 'rgba(27,27,58,0.5)' },
   detailValue: { fontSize: 14, fontFamily: FONTS.bold, color: COLORS.accent, maxWidth: '55%', textAlign: 'right' },
