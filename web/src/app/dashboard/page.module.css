@@ -454,6 +454,226 @@
   word-break: break-all;
 }
 
+/* ── Pay Banner ───────────────────────────────────────────── */
+.payBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+  border-radius: 14px;
+  padding: 18px 24px;
+  margin-bottom: 24px;
+  color: #fff;
+}
+.payBannerTitle { font-size: 12px; font-weight: 600; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.payBannerAmount { font-size: 28px; font-weight: 800; }
+.payBannerBtn {
+  background: #fff;
+  color: #0f766e;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.payBannerBtn:hover { opacity: 0.9; }
+.payBannerPaid {
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Tab header ───────────────────────────────────────────── */
+.tabHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+.primaryBtn {
+  background: #0f766e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.primaryBtn:hover { opacity: 0.9; }
+.paidBadge {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Data Table ───────────────────────────────────────────── */
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.dataTable thead tr { background: #f8fafc; }
+.dataTable th {
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-bottom: 1px solid #e2e8f0;
+  white-space: nowrap;
+}
+.dataTable td {
+  padding: 12px 14px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #374151;
+  vertical-align: middle;
+}
+.monoSmall { font-family: monospace; font-size: 11px; color: #64748b; }
+
+/* ── Tier badges ──────────────────────────────────────────── */
+.tier_basic    { background: #f0fdf4; color: #16a34a; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.tier_standard { background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.tier_pro      { background: #faf5ff; color: #7c3aed; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+/* ── Status badges ────────────────────────────────────────── */
+.badgeGreen  { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.badgeRed    { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.badgeAmber  { background: #fffbeb; color: #d97706; border: 1px solid #fde68a; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.badgeBlue   { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.badgePurple { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+.greenText   { color: #16a34a; }
+
+/* ── Empty state ──────────────────────────────────────────── */
+.emptyState {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 48px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+
+/* ── Claims grid ──────────────────────────────────────────── */
+.claimsGrid { display: flex; flex-direction: column; gap: 14px; }
+.claimCard {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+}
+.claimCardHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.claimType { font-size: 14px; font-weight: 700; color: #0f172a; }
+.claimDesc { font-size: 13px; color: #374151; margin: 0 0 12px; line-height: 1.5; }
+.claimMeta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 12px; color: #64748b; margin-bottom: 8px; }
+.adminNotes { font-size: 12px; color: #64748b; background: #f8fafc; border-radius: 6px; padding: 8px 12px; margin-top: 8px; }
+.claimDate { font-size: 11px; color: #94a3b8; margin-top: 8px; }
+
+/* ── Modal ────────────────────────────────────────────────── */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15,23,42,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 28px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+}
+.modalTitle { font-size: 18px; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
+.modalSub   { font-size: 12px; color: #64748b; margin: 0 0 20px; }
+
+.modalAmountBox {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.modalAmountLabel { font-size: 11px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.modalAmount { font-size: 32px; font-weight: 800; color: #0f172a; }
+.modalTier   { font-size: 12px; color: #64748b; margin-top: 4px; }
+
+.modalField { margin-bottom: 14px; }
+.modalLabel { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 6px; }
+
+.methodGrid { display: flex; gap: 8px; }
+.methodBtn {
+  flex: 1; padding: 10px; border: 1px solid #d1d5db; background: #f8fafc;
+  border-radius: 8px; font-size: 13px; font-weight: 600; color: #374151; cursor: pointer;
+}
+.methodBtnSelected {
+  flex: 1; padding: 10px; border: 2px solid #0f766e; background: #f0fdf4;
+  border-radius: 8px; font-size: 13px; font-weight: 700; color: #0f766e; cursor: pointer;
+}
+
+.modalSelect, .modalInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+  background: #fff;
+}
+.modalTextarea {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 13px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+  resize: vertical;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.modalActions { display: flex; gap: 10px; margin-top: 20px; }
+.modalCancelBtn {
+  flex: 1; padding: 11px; border: 1px solid #e2e8f0; background: #f8fafc;
+  border-radius: 10px; font-size: 13px; font-weight: 600; color: #64748b; cursor: pointer;
+}
+.modalPayBtn {
+  flex: 2; padding: 11px; border: none; background: #0f766e;
+  border-radius: 10px; font-size: 14px; font-weight: 700; color: #fff; cursor: pointer;
+}
+.modalPayBtn:disabled, .modalCancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.modalDisclaimer { font-size: 11px; color: #94a3b8; text-align: center; margin-top: 12px; }
+.modalError   { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
+.modalSuccess { background: #f0fdf4; border: 1px solid #86efac; color: #166534; border-radius: 8px; padding: 8px 12px; font-size: 13px; margin-top: 8px; }
+
+.paySuccessBox { text-align: center; padding: 12px 0; }
+.paySuccessIcon { font-size: 48px; color: #16a34a; margin-bottom: 12px; }
+.paySuccessTitle { font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px; }
+.paySuccessAmount { font-size: 28px; font-weight: 800; color: #0f766e; margin-bottom: 8px; }
+.paySuccessId { font-family: monospace; font-size: 12px; color: #64748b; margin-bottom: 20px; }
+
 @media (max-width: 1024px) {
   .grid4 {
     grid-template-columns: repeat(2, 1fr);

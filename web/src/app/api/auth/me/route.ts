@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
     const { data: user, error } = await db
       .from("registered_workers")
       .select(
-        "id, name, email, phone, platforms, tier, verification_status, city, area, delivery_id, autopay, is_active",
+        "id, name, email, phone, platforms, tier, verification_status, city, area, delivery_id, autopay, upi, is_active",
       )
       .eq("id", userId)
       .eq("is_active", true)
