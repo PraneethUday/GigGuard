@@ -1095,7 +1095,7 @@ export default function DashboardPage() {
                     <ProfileRow
                       label="Platforms"
                       value={user.platforms
-                        .map((p) => PLATFORM_NAMES[p] || p)
+                        .map((p) => PLATFORM_META[p]?.name || p)
                         .join(", ")}
                     />
                   </div>
