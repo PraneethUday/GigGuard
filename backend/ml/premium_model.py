@@ -31,9 +31,9 @@ METADATA_PATH = MODEL_DIR / "model_metadata.json"
 # Premium config per tier
 # Rate is applied to weekly_earnings_est; min/max are the allowed output bounds
 TIER_CONFIG = {
-    "basic":    {"rate": 0.015, "min": 10,  "max": 60,  "max_payout": 500},
-    "standard": {"rate": 0.025, "min": 20,  "max": 120, "max_payout": 1200},
-    "pro":      {"rate": 0.035, "min": 40,  "max": 200, "max_payout": 2500},
+    "basic":    {"rate": 0.015, "min": 10,  "max": 120,  "max_payout": 500},
+    "standard": {"rate": 0.025, "min": 20,  "max": 250, "max_payout": 1200},
+    "pro":      {"rate": 0.035, "min": 40,  "max": 400, "max_payout": 2500},
 }
 
 # City risk weights (base — overridden by real weather data during prediction)

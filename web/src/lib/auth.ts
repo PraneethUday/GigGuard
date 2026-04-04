@@ -1,9 +1,17 @@
 import { SignJWT, jwtVerify } from 'jose'
 import bcrypt from 'bcryptjs'
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'gigguard-dev-secret'
-)
+const primarySecret = process.env.JWT_SECRET || 'gigguard-dev-secret'
+const legacyDevSecret = 'gigguard-dev-secret'
+
+const signingSecret = new TextEncoder().encode(primarySecret)
+
+const verifySecrets = [
+  new TextEncoder().encode(primarySecret),
+  ...(primarySecret !== legacyDevSecret
+    ? [new TextEncoder().encode(legacyDevSecret)]
+    : []),
+]
 
 export async function hashPassword(password: string): Promise<string> {
   return bcrypt.hash(password, 12)
@@ -17,14 +25,18 @@ export async function createToken(userId: string): Promise<string> {
   return new SignJWT({ sub: userId })
     .setProtectedHeader({ alg: 'HS256' })
     .setExpirationTime('30d')
-    .sign(secret)
+    .sign(signingSecret)
 }
 
 export async function verifyToken(token: string): Promise<string | null> {
-  try {
-    const { payload } = await jwtVerify(token, secret)
-    return payload.sub as string
-  } catch {
-    return null
+  for (const secret of verifySecrets) {
+    try {
+      const { payload } = await jwtVerify(token, secret)
+      if (payload.sub) return payload.sub as string
+    } catch {
+      // try next known secret
+    }
   }
+
+  return null
 }

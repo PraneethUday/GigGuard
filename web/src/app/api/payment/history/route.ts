@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth";
-
-const BACKEND = process.env.BACKEND_URL || "http://localhost:8000";
+import { getPayments } from "@/lib/payment-store";
 
 function getToken(req: NextRequest): string | null {
   const h = req.headers.get("authorization") || "";
@@ -15,11 +14,6 @@ export async function GET(req: NextRequest) {
   const workerId = await verifyToken(token);
   if (!workerId) return NextResponse.json({ error: "Invalid token" }, { status: 401 });
 
-  try {
-    const res = await fetch(`${BACKEND}/api/payment/history/${workerId}`);
-    const data = await res.json();
-    return NextResponse.json(data);
-  } catch {
-    return NextResponse.json({ error: "Backend unavailable." }, { status: 502 });
-  }
+  const payments = getPayments(workerId);
+  return NextResponse.json({ payments });
 }

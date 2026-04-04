@@ -26,8 +26,16 @@ function money(value) {
   return `₹${Math.round(value)}`;
 }
 
-function mapClaimStatus(status) {
-  if (status === "paid") return "paid";
+function mapClaimStatus(payoutStatus, claimStatus) {
+  const status = (payoutStatus || claimStatus || "").toLowerCase();
+  if (
+    status === "paid" ||
+    status === "approved" ||
+    status === "success" ||
+    status === "completed"
+  ) {
+    return "paid";
+  }
   if (status === "rejected") return "rejected";
   return "under-review";
 }
@@ -55,7 +63,7 @@ const STATUS = {
   paid: {
     bg: "#0A2E18",
     color: COLORS.success,
-    label: "Paid",
+    label: "Settled",
     icon: "checkmark-circle",
   },
   "under-review": {
@@ -136,7 +144,7 @@ export default function ClaimsScreen({ navigation }) {
   const normalizedClaims = useMemo(() => {
     return claims.map((claim) => ({
       ...claim,
-      _status: mapClaimStatus(claim.payout_status),
+      _status: mapClaimStatus(claim.payout_status, claim.status),
       _icon: TRIGGER_ICONS[claim.trigger_type] || "document-text",
     }));
   }, [claims]);
@@ -292,24 +300,48 @@ export default function ClaimsScreen({ navigation }) {
         {/* Summary banner */}
         <View style={styles.summaryRow}>
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryValue}>{normalizedClaims.length}</Text>
+            <Text
+              style={styles.summaryValue}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {normalizedClaims.length}
+            </Text>
             <Text style={styles.summaryLabel}>Total</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: COLORS.success }]}>
-              ₹{totalPaid}
+            <Text
+              style={[styles.summaryValue, { color: COLORS.success }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {money(totalPaid)}
             </Text>
             <Text style={styles.summaryLabel}>Received</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={styles.summaryValue}>{paidCount}</Text>
-            <Text style={styles.summaryLabel}>Paid</Text>
+            <Text
+              style={styles.summaryValue}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
+              {paidCount}
+            </Text>
+            <Text style={styles.summaryLabel}>Settled</Text>
           </View>
           <View style={styles.summaryDivider} />
           <View style={styles.summaryItem}>
-            <Text style={[styles.summaryValue, { color: COLORS.error }]}>
+            <Text
+              style={[styles.summaryValue, { color: COLORS.error }]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}
+            >
               {rejectedCount}
             </Text>
             <Text style={styles.summaryLabel}>Rejected</Text>
@@ -423,9 +455,9 @@ export default function ClaimsScreen({ navigation }) {
                         styles.detailValue,
                         {
                           color:
-                            claim._status === "paid"
-                              ? COLORS.success
-                              : COLORS.error,
+                            claim._status === "rejected"
+                              ? COLORS.error
+                              : COLORS.success,
                         },
                       ]}
                     >
@@ -440,7 +472,9 @@ export default function ClaimsScreen({ navigation }) {
                   <View style={styles.claimFooter}>
                     <Ionicons name="flash" size={12} color={COLORS.success} />
                     <Text style={styles.claimFooterText}>
-                      UPI transaction: {claim.transaction_id || "Pending sync"}
+                      {claim.transaction_id
+                        ? `UPI transaction: ${claim.transaction_id}`
+                        : "Approved for payout. Transaction pending."}
                     </Text>
                   </View>
                 )}
@@ -647,6 +681,8 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     color: COLORS.white,
     marginBottom: 2,
+    textAlign: "center",
+    width: "100%",
   },
   summaryLabel: {
     fontSize: SIZES.tiny,

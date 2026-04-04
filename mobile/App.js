@@ -20,6 +20,7 @@ import HomeScreen from './screens/HomeScreen';
 import PolicyScreen from './screens/PolicyScreen';
 import ClaimsScreen from './screens/ClaimsScreen';
 import ProfileScreen from './screens/ProfileScreen';
+import PaymentScreen from './screens/PaymentScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,7 @@ function AppNavigator() {
       <Stack.Screen name="Policy" component={PolicyScreen} />
       <Stack.Screen name="Claims" component={ClaimsScreen} />
       <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="Payments" component={PaymentScreen} />
     </Stack.Navigator>
   );
 }

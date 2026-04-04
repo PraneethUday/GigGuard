@@ -20,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from db import fetch_workers, fetch_worker_history, supabase
+from generator import generate_daily_rows
 from auth_utils import verify_password, hash_password, create_token, verify_token
 from scheduler import tick, run_retrain, INTERVAL_SECONDS
 from ml.weather import fetch_weather, fetch_all_cities
@@ -652,20 +653,25 @@ class AdjustIncomeRequest(BaseModel):
 async def adjust_income(req: AdjustIncomeRequest):
     """Adjust worker income data by multiplier for testing the ML model.
 
-    This modifies TODAY's data for the specified platform or worker,
-    letting the admin see how the model responds to different income levels.
+    Modifies the last 7 days of data so the change fully affects the
+    7-day rolling average used by the ML model. Uses batch upsert (one DB
+    call per table) instead of row-by-row updates for speed.
     """
-    from datetime import date as date_type
-    today = date_type.today().isoformat()
+    from datetime import date as date_type, timedelta
+    today = date_type.today()
+    start_date = (today - timedelta(days=6)).isoformat()
+    end_date = today.isoformat()
+
+    valid_tables = {
+        "swiggy_workers", "zomato_workers", "amazon_flex_workers",
+        "blinkit_workers", "zepto_workers", "meesho_workers",
+        "porter_workers", "dunzo_workers",
+    }
 
     tables = []
     if req.platform:
         table_name = f"{req.platform}_workers"
-        if table_name in [
-            "swiggy_workers", "zomato_workers", "amazon_flex_workers",
-            "blinkit_workers", "zepto_workers", "meesho_workers",
-            "porter_workers", "dunzo_workers",
-        ]:
+        if table_name in valid_tables:
             tables = [table_name]
     else:
         from db import PLATFORM_TABLES
@@ -674,25 +680,38 @@ async def adjust_income(req: AdjustIncomeRequest):
     updated_count = 0
     for table in tables:
         try:
-            query = supabase.table(table).select("id, earnings, deliveries").eq("date", today)
+            query = (
+                supabase.table(table)
+                .select("id, earnings, deliveries")
+                .gte("date", start_date)
+                .lte("date", end_date)
+            )
             if req.worker_id:
                 query = query.eq("worker_id", req.worker_id)
-            resp = query.limit(500).execute()
+            resp = query.limit(2000).execute()
 
-            for row in resp.data:
-                new_earnings = round(row["earnings"] * req.earnings_multiplier, 2)
-                new_deliveries = max(1, int(row["deliveries"] * req.deliveries_multiplier))
-                supabase.table(table).update({
-                    "earnings": new_earnings,
-                    "deliveries": new_deliveries,
-                }).eq("id", row["id"]).execute()
-                updated_count += 1
+            if not resp.data:
+                continue
+
+            # Build batch upsert payload — one call per table instead of per row
+            updates = [
+                {
+                    "id": row["id"],
+                    "earnings": round(row["earnings"] * req.earnings_multiplier, 2),
+                    "deliveries": max(1, int(row["deliveries"] * req.deliveries_multiplier)),
+                }
+                for row in resp.data
+            ]
+            supabase.table(table).upsert(updates, on_conflict="id").execute()
+            updated_count += len(updates)
+
         except Exception as e:
             logger.error(f"Error adjusting {table}: {e}")
 
     return {
         "status": "ok",
         "updated_rows": updated_count,
+        "days_modified": 7,
         "earnings_multiplier": req.earnings_multiplier,
         "deliveries_multiplier": req.deliveries_multiplier,
     }
@@ -744,9 +763,24 @@ async def data_summary():
 
 @app.post("/api/admin/generate-data")
 async def trigger_data_generation():
-    """Manually trigger one cycle of data generation."""
-    await tick()
-    return {"status": "ok", "message": "Data generation cycle completed."}
+    """Manually trigger one cycle of data generation.
+
+    Inserts/updates today's synthetic rows for all workers immediately.
+    Trigger polling (which requires external HTTP calls to OpenWeatherMap)
+    is dispatched as a background task so this endpoint returns fast.
+    """
+    from datetime import date as date_type
+    from db import upsert_rows as _upsert
+    today = date_type.today()
+    rows = await asyncio.to_thread(generate_daily_rows, target_date=today)
+    await asyncio.to_thread(_upsert, rows)
+    # Fire trigger polling in the background — don't block the response
+    asyncio.create_task(poll_triggers())
+    return {
+        "status": "ok",
+        "message": f"Generated and upserted {len(rows)} rows for {today.isoformat()}.",
+        "rows_generated": len(rows),
+    }
 
 
 # ---------------------------------------------------------------------------

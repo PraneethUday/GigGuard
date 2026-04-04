@@ -153,21 +153,25 @@ export async function getPremiumQuotes(deliveryId, city) {
 
 // Claims routes
 export async function getWorkerClaims(token, deliveryId) {
-  if (token) {
+  if (deliveryId) {
     try {
-      return await request(`${WEB_URL}/api/claims/worker`, {
-        headers: authHeaders(token),
-      });
+      return await request(
+        `${WEB_URL}/api/backend/claims/worker/${encodeURIComponent(deliveryId)}`,
+      );
     } catch {
-      // fallback below
+      return request(
+        `${BACKEND_URL}/api/claims/worker/${encodeURIComponent(deliveryId)}`,
+      );
     }
   }
 
-  if (!deliveryId) {
-    throw new Error("deliveryId is required when auth token is unavailable");
+  if (token) {
+    return request(`${WEB_URL}/api/claims/worker`, {
+      headers: authHeaders(token),
+    });
   }
 
-  return request(`${BACKEND_URL}/api/claims/worker/${deliveryId}`);
+  throw new Error("deliveryId or token is required to fetch claims");
 }
 
 // Weather / triggers routes
@@ -191,6 +195,10 @@ export async function getTriggerStatus() {
 
 // Payment routes
 export function payPremium(token, payload = {}) {
+  if (!token) {
+    throw new Error("Authentication required. Please log in again.");
+  }
+
   return request(`${WEB_URL}/api/payment/pay`, {
     method: "POST",
     headers: authHeaders(token),
@@ -199,6 +207,10 @@ export function payPremium(token, payload = {}) {
 }
 
 export function getPaymentHistory(token) {
+  if (!token) {
+    throw new Error("Authentication required. Please log in again.");
+  }
+
   return request(`${WEB_URL}/api/payment/history`, {
     headers: authHeaders(token),
   });

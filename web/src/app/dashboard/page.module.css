@@ -309,3 +309,15 @@
   .heroTitle { font-size: 22px; }
   .grid4, .coverageGrid, .nextWeekSummary { grid-template-columns: 1fr; }
 }
+
+/* ── Utility classes (replacing inline styles) ────────────────────────────── */
+.bannerMeta     { font-size: 12px; opacity: 0.7; margin-top: 4px; }
+.claimsIntro    { margin-bottom: 20px; }
+.claimsList     { display: flex; flex-direction: column; gap: 12px; }
+.claimPanel     { margin-bottom: 0; }
+.claimHeading   { margin: 0; font-size: 16px; }
+.claimBody      { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; }
+.panelTitleSpaced { margin-bottom: 16px; }
+.modalDoneBtn   { margin-top: 0; }
+.upiHint        { font-size: 11px; color: var(--faint); margin-top: 6px; }
+.cardGrid       { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }

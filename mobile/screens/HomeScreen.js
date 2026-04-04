@@ -22,6 +22,17 @@ const TRIGGER_ICONS = {
   curfew: "ban",
 };
 
+const PLATFORM_NAMES = {
+  swiggy: "Swiggy",
+  zomato: "Zomato",
+  amazon: "Amazon Flex",
+  blinkit: "Blinkit",
+  zepto: "Zepto",
+  meesho: "Meesho",
+  porter: "Porter",
+  dunzo: "Dunzo",
+};
+
 function money(value) {
   if (typeof value !== "number" || Number.isNaN(value)) return "—";
   return `₹${Math.round(value)}`;
@@ -81,9 +92,19 @@ const HomeScreen = ({ navigation }) => {
   const [claims, setClaims] = useState([]);
   const [triggerStatus, setTriggerStatus] = useState({});
 
+  const deliveryId = user?.delivery_id;
+  const userCity = user?.city;
+  const userTier = user?.tier || "standard";
+
   const loadDashboard = useCallback(
     async (isRefresh = false) => {
-      if (!user) return;
+      if (!deliveryId) {
+        setLoading(false);
+        setClaims([]);
+        setPremium(null);
+        setError("Missing delivery ID for this account.");
+        return;
+      }
 
       if (isRefresh) {
         setRefreshing(true);
@@ -94,17 +115,13 @@ const HomeScreen = ({ navigation }) => {
       setError("");
 
       try {
-        await refreshUser();
+        if (isRefresh) {
+          await refreshUser();
+        }
 
         const [premiumRes, claimsRes, triggersRes] = await Promise.allSettled([
-          user.delivery_id
-            ? api.predictPremium(
-                user.delivery_id,
-                user.city,
-                user.tier || "standard",
-              )
-            : Promise.resolve(null),
-          api.getWorkerClaims(token, user.delivery_id),
+          api.predictPremium(deliveryId, userCity, userTier),
+          api.getWorkerClaims(token, deliveryId),
           api.getTriggerStatus(),
         ]);
 
@@ -135,7 +152,7 @@ const HomeScreen = ({ navigation }) => {
         setRefreshing(false);
       }
     },
-    [refreshUser, token, user],
+    [deliveryId, refreshUser, token, userCity, userTier],
   );
 
   useEffect(() => {
@@ -154,7 +171,9 @@ const HomeScreen = ({ navigation }) => {
     ? premium?.weekly_premium_autopay
     : premium?.weekly_premium;
   const coverageActive = user?.verification_status === "verified" && !!premium;
-  const paidClaims = claims.filter((c) => c.payout_status === "paid");
+  const paidClaims = claims.filter(
+    (c) => c.payout_status === "paid" || c.status === "paid",
+  );
   const totalPaid = paidClaims.reduce(
     (sum, claim) => sum + (Number(claim.payout_amount) || 0),
     0,
@@ -162,7 +181,7 @@ const HomeScreen = ({ navigation }) => {
 
   const recentActivity = useMemo(() => {
     const claimItems = claims.slice(0, 3).map((claim) => {
-      const tone = getStatusTone(claim.payout_status);
+      const tone = getStatusTone(claim.payout_status || claim.status);
       return {
         icon: TRIGGER_ICONS[claim.trigger_type] || "document-text",
         color: tone.color,
@@ -210,7 +229,9 @@ const HomeScreen = ({ navigation }) => {
             <View style={styles.platformBadge}>
               <Text style={styles.platformBadgeText}>
                 {(user?.platforms || []).length > 0
-                  ? user.platforms.join(" + ")
+                  ? user.platforms
+                      .map((p) => PLATFORM_NAMES[p] || p)
+                      .join(" + ")
                   : "No platform linked"}
               </Text>
             </View>
@@ -381,15 +402,15 @@ const HomeScreen = ({ navigation }) => {
             color={COLORS.amber}
           />
           <QuickAction
-            icon="person-outline"
-            label="Profile"
-            onPress={() => navigation.navigate("Profile")}
+            icon="card-outline"
+            label="Payments"
+            onPress={() => navigation.navigate("Payments")}
             color={COLORS.success}
           />
           <QuickAction
-            icon="refresh"
-            label="Refresh"
-            onPress={() => loadDashboard(true)}
+            icon="person-outline"
+            label="Profile"
+            onPress={() => navigation.navigate("Profile")}
             color={COLORS.info}
           />
         </View>
