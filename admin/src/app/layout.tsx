@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "GigGuard Admin",
-  description: "GigGuard admin dashboard server",
+  title: "Worker Protection Insurance Platoform (WPIP) Admin",
+  description: "WPIP admin dashboard server",
 };
 
 export default function RootLayout({

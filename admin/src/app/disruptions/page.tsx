@@ -174,8 +174,8 @@ export default function DisruptionsPage() {
       {/* Header */}
       <header style={{ background: "#0f172a", padding: "0 24px", height: 60, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 36, height: 36, background: "#4f46e5", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>GG</div>
-          <span style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>GigGuard</span>
+          <div style={{ width: 36, height: 36, background: "#4f46e5", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 14, fontWeight: 800, color: "#fff" }}>WP</div>
+          <span style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>WPIP</span>
           <span style={{ background: "#dc2626", color: "#fff", fontSize: 11, fontWeight: 700, padding: "3px 10px", borderRadius: 6, marginLeft: 4 }}>Disruptions</span>
         </div>
         <div style={{ display: "flex", gap: 8 }}>

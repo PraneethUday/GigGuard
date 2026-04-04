@@ -32,7 +32,7 @@ const LandingScreen = ({ navigation }) => {
             <View style={styles.logoIcon}>
               <Ionicons name="shield-checkmark" size={18} color={COLORS.white} />
             </View>
-            <Text style={styles.logoText}>GigGuard</Text>
+            <Text style={styles.logoText}>WPIP</Text>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Login')}>
             <Text style={styles.loginLink}>Login</Text>
@@ -118,7 +118,7 @@ const LandingScreen = ({ navigation }) => {
           ))}
         </View>
 
-        <Text style={styles.footer}>© 2026 GigGuard Technologies · IRDAI Registered</Text>
+        <Text style={styles.footer}>© 2026 WPIP Technologies · IRDAI Registered</Text>
       </ScrollView>
     </SafeAreaView>
   );

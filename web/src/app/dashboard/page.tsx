@@ -52,15 +52,18 @@ type PaymentRecord = {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const PLATFORM_NAMES: Record<string, string> = {
-  swiggy: "Swiggy",
-  zomato: "Zomato",
-  amazon: "Amazon Flex",
-  blinkit: "Blinkit",
-  zepto: "Zepto",
-  meesho: "Meesho",
-  porter: "Porter",
-  dunzo: "Dunzo",
+const PLATFORM_META: Record<
+  string,
+  { name: string; symbol: string; iconClass: string }
+> = {
+  swiggy: { name: "Swiggy", symbol: "SW", iconClass: "platformIconSwiggy" },
+  zomato: { name: "Zomato", symbol: "ZO", iconClass: "platformIconZomato" },
+  amazon: { name: "Amazon Flex", symbol: "AF", iconClass: "platformIconAmazon" },
+  blinkit: { name: "Blinkit", symbol: "BL", iconClass: "platformIconBlinkit" },
+  zepto: { name: "Zepto", symbol: "ZE", iconClass: "platformIconZepto" },
+  meesho: { name: "Meesho", symbol: "ME", iconClass: "platformIconMeesho" },
+  porter: { name: "Porter", symbol: "PO", iconClass: "platformIconPorter" },
+  dunzo: { name: "Dunzo", symbol: "DZ", iconClass: "platformIconDunzo" },
 };
 
 const TIERS: Tier[] = ["basic", "standard", "pro"];
@@ -448,8 +451,8 @@ export default function DashboardPage() {
       {/* ── Header ── */}
       <header className={styles.header}>
         <div className={styles.brandBlock}>
-          <div className={styles.brandLogo}>GG</div>
-          <span className={styles.brandText}>GigGuard</span>
+          <div className={styles.brandLogo}>WP</div>
+          <span className={styles.brandText}>WPIP</span>
         </div>
         <div className={styles.headerActions}>
           <div className={styles.userBadge}>
@@ -642,9 +645,23 @@ export default function DashboardPage() {
                 <section className={styles.panel}>
                   <h3 className={styles.panelTitle}>Connected platforms</h3>
                   <div className={styles.platformWrap}>
-                    {user.platforms.map((p) => (
-                      <span key={p} className={styles.platformChip}>{PLATFORM_NAMES[p] || p}</span>
-                    ))}
+                    {user.platforms.map((p) => {
+                      const meta = PLATFORM_META[p] ?? {
+                        name: p,
+                        symbol: p.slice(0, 2).toUpperCase(),
+                        iconClass: "platformIconDefault",
+                      };
+                      return (
+                        <span key={p} className={styles.platformChip}>
+                          <span
+                            className={`${styles.platformChipIcon} ${styles[meta.iconClass]}`}
+                          >
+                            {meta.symbol}
+                          </span>
+                          {meta.name}
+                        </span>
+                      );
+                    })}
                   </div>
                 </section>
 

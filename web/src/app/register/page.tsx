@@ -3,14 +3,14 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 const PLATFORMS = [
-  { id: 'zomato', name: 'Zomato' },
-  { id: 'swiggy', name: 'Swiggy' },
-  { id: 'amazon', name: 'Amazon Flex' },
-  { id: 'blinkit', name: 'Blinkit' },
-  { id: 'zepto', name: 'Zepto' },
-  { id: 'meesho', name: 'Meesho' },
-  { id: 'porter', name: 'Porter' },
-  { id: 'dunzo', name: 'Dunzo' },
+  { id: 'zomato', name: 'Zomato', symbol: 'ZO', bg: '#fff1f2', color: '#be123c', border: '#fecdd3' },
+  { id: 'swiggy', name: 'Swiggy', symbol: 'SW', bg: '#eef2ff', color: '#4f46e5', border: '#c7d2fe' },
+  { id: 'amazon', name: 'Amazon Flex', symbol: 'AF', bg: '#fffbeb', color: '#b45309', border: '#fde68a' },
+  { id: 'blinkit', name: 'Blinkit', symbol: 'BL', bg: '#fefce8', color: '#a16207', border: '#fde047' },
+  { id: 'zepto', name: 'Zepto', symbol: 'ZE', bg: '#f5f3ff', color: '#6d28d9', border: '#ddd6fe' },
+  { id: 'meesho', name: 'Meesho', symbol: 'ME', bg: '#fdf4ff', color: '#a21caf', border: '#f0abfc' },
+  { id: 'porter', name: 'Porter', symbol: 'PO', bg: '#ecfeff', color: '#0f766e', border: '#99f6e4' },
+  { id: 'dunzo', name: 'Dunzo', symbol: 'DZ', bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
 ]
 const CITIES = ['Bengaluru', 'Chennai', 'Delhi', 'Mumbai', 'Hyderabad', 'Pune', 'Kolkata', 'Ahmedabad', 'Jaipur', 'Surat']
 const STEPS = ['Platform', 'Personal Info', 'Documents', 'Coverage']
@@ -26,6 +26,12 @@ const labelStyle: React.CSSProperties = {
 const focusHandler = {
   onFocus: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.target.style.borderColor = '#4f46e5'; e.target.style.boxShadow = '0 0 0 3px rgba(79,70,229,0.1)' },
   onBlur: (e: React.FocusEvent<HTMLInputElement | HTMLSelectElement>) => { e.target.style.borderColor = '#d1d5db'; e.target.style.boxShadow = 'none' },
+}
+
+const platformLabel = (id: string) => {
+  const platform = PLATFORMS.find((p) => p.id === id)
+  if (!platform) return id
+  return `${platform.symbol} ${platform.name}`
 }
 
 type Form = {
@@ -139,7 +145,7 @@ export default function RegisterPage() {
             fontSize: 18, fontWeight: 800, color: '#fff', marginBottom: 12,
           }}>GG</div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#0f172a', margin: 0 }}>Create your account</h1>
-          <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>Register as a delivery partner on GigGuard</p>
+          <p style={{ color: '#64748b', fontSize: 14, marginTop: 4 }}>Register as a delivery partner on Worker Protection Insurance Platoform (WPIP)</p>
         </div>
 
         {/* Stepper */}
@@ -188,11 +194,18 @@ export default function RegisterPage() {
                   const sel = form.platforms.includes(p.id)
                   return (
                     <div key={p.id} onClick={() => togglePlatform(p.id)} style={{
-                      padding: '16px 12px', textAlign: 'center', cursor: 'pointer', borderRadius: 10,
+                      padding: '14px 12px', textAlign: 'center', cursor: 'pointer', borderRadius: 10,
                       border: sel ? '2px solid #4f46e5' : '1px solid #e2e8f0',
                       background: sel ? '#eef2ff' : '#fff',
                       transition: 'all 0.15s',
                     }}>
+                      <div style={{
+                        width: 34, height: 34, margin: '0 auto 8px', borderRadius: 9,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 11, fontWeight: 800, letterSpacing: 0.4,
+                        background: p.bg, color: p.color,
+                        border: `1px solid ${sel ? '#4f46e5' : p.border}`,
+                      }}>{p.symbol}</div>
                       <div style={{ fontSize: 14, fontWeight: 600, color: sel ? '#4f46e5' : '#374151' }}>{p.name}</div>
                       {sel && <div style={{ fontSize: 12, color: '#4f46e5', marginTop: 4, fontWeight: 500 }}>Selected</div>}
                     </div>
@@ -273,7 +286,7 @@ export default function RegisterPage() {
                   <p style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>Click &quot;Verify ID&quot; to check if your partner ID exists in the selected platform databases.</p>
                   {verifyResult && verifyResult.verified && (
                     <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 8, padding: '10px 14px', marginTop: 8, fontSize: 13, color: '#16a34a', fontWeight: 500 }}>
-                      ID verified on: {verifyResult.matched_platforms.map(id => PLATFORMS.find(p => p.id === id)?.name || id).join(', ')}
+                      ID verified on: {verifyResult.matched_platforms.map((id) => platformLabel(id)).join(', ')}
                     </div>
                   )}
                   {verifyResult && !verifyResult.verified && (
@@ -316,7 +329,7 @@ export default function RegisterPage() {
               <div style={{ marginTop: 24, borderTop: '1px solid #e2e8f0', paddingTop: 20 }}>
                 <p style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 14 }}>Consent & authorisations</p>
                 {[
-                  { key: 'consent' as keyof Form, label: 'I authorise GigGuard to monitor weather and disruption data in my delivery zone for insurance claims.' },
+                  { key: 'consent' as keyof Form, label: 'I authorise WPIP to monitor weather and disruption data in my delivery zone for insurance claims.' },
                   { key: 'gpsConsent' as keyof Form, label: 'I authorise GPS location validation during disruption events for fraud prevention.' },
                   { key: 'autopay' as keyof Form, label: 'Enable AutoPay — auto-deduct weekly premium from platform payout (5% discount).' },
                 ].map(item => (
@@ -365,7 +378,7 @@ export default function RegisterPage() {
               <div style={{ background: '#f8fafc', borderRadius: 10, padding: 20, marginBottom: 24, border: '1px solid #e2e8f0' }}>
                 <p style={{ fontSize: 14, fontWeight: 600, color: '#374151', marginBottom: 12 }}>Summary</p>
                 {[
-                  ['Platforms', form.platforms.map(id => PLATFORMS.find(p => p.id === id)?.name).join(', ') || '-'],
+                  ['Platforms', form.platforms.map((id) => platformLabel(id)).join(', ') || '-'],
                   ['Weekly Premium (est.)', `\u20B9${weeklyPremium}`],
                   ['Max Weekly Payout', `\u20B9${maxPayout}`],
                   ['AutoPay', form.autopay ? 'Enabled (5% discount)' : 'Disabled'],

@@ -187,7 +187,41 @@
 
 /* ── Platform chips ───────────────────────────────────────── */
 .platformWrap { display: flex; gap: 8px; flex-wrap: wrap; }
-.platformChip { background: var(--primary-container); color: var(--primary-dim); border: 1px solid rgba(108,99,255,0.3); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 700; }
+.platformChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--primary-container);
+  color: var(--primary-dim);
+  border: 1px solid rgba(108,99,255,0.3);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.platformChipIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  border: 1px solid transparent;
+}
+
+.platformIconSwiggy { background: #2b2a57; color: #8B84FF; border-color: #4c46b6; }
+.platformIconZomato { background: #3b1d25; color: #fb7185; border-color: #be123c; }
+.platformIconAmazon { background: #302512; color: #f59e0b; border-color: #d97706; }
+.platformIconBlinkit { background: #2f2a12; color: #facc15; border-color: #ca8a04; }
+.platformIconZepto { background: #201a3d; color: #a78bfa; border-color: #7c3aed; }
+.platformIconMeesho { background: #2f1437; color: #e879f9; border-color: #c026d3; }
+.platformIconPorter { background: #162f2b; color: #34d399; border-color: #0f766e; }
+.platformIconDunzo { background: #15293d; color: #60a5fa; border-color: #2563eb; }
+.platformIconDefault { background: #1f2538; color: #c7c4d8; border-color: #464555; }
 
 /* ── Alerts ───────────────────────────────────────────────── */
 .warningBox { background: var(--amber-container); color: var(--amber); border: 1px solid rgba(255,140,66,0.3); border-radius: 10px; padding: 12px; font-size: 13px; }

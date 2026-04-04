@@ -1,5 +1,5 @@
 -- ============================================================
--- GigGuard Auth — registered_workers table
+-- Worker Protection Insurance Platoform (WPIP) Auth — registered_workers table
 -- Run in Supabase SQL Editor (Dashboard → SQL Editor)
 -- ============================================================
 

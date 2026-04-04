@@ -1,4 +1,4 @@
-# GigGuard Admin Server
+# Worker Protection Insurance Platoform (WPIP) Admin Server
 
 Standalone Next.js server for insurer admin operations.
 

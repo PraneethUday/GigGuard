@@ -565,7 +565,7 @@ const SignUpScreen = ({ navigation }) => {
                   {
                     key: "consent",
                     label:
-                      "I authorise GigGuard to monitor weather and disruption data in my delivery zone for insurance claims.",
+                      "I authorise WPIP to monitor weather and disruption data in my delivery zone for insurance claims.",
                   },
                   {
                     key: "gpsConsent",

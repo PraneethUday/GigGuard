@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'GigGuard — Income Protection for Delivery Workers',
+  title: 'Worker Protection Insurance Platoform (WPIP) — Income Protection for Delivery Workers',
   description: 'Parametric insurance for gig workers across Swiggy, Zomato, Blinkit & more.',
 }
 

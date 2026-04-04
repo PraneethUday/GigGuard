@@ -208,7 +208,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.loaderWrap}>
           <ActivityIndicator color={COLORS.primary} size="large" />
           <Text style={styles.loaderText}>
-            Loading your GigGuard dashboard...
+            Loading your WPIP dashboard...
           </Text>
         </View>
       </SafeAreaView>
@@ -225,7 +225,7 @@ const HomeScreen = ({ navigation }) => {
         <View style={styles.topBar}>
           <View>
             <Text style={styles.greeting}>Good morning,</Text>
-            <Text style={styles.userName}>{user?.name || "GigGuard User"}</Text>
+            <Text style={styles.userName}>{user?.name || "WPIP User"}</Text>
             <View style={styles.platformBadge}>
               <Text style={styles.platformBadgeText}>
                 {(user?.platforms || []).length > 0

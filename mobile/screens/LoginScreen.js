@@ -60,7 +60,7 @@ const LoginScreen = ({ navigation }) => {
                 color={COLORS.white}
               />
             </View>
-            <Text style={styles.logoText}>GigGuard</Text>
+            <Text style={styles.logoText}>WPIP</Text>
           </View>
 
           <Text style={styles.title}>Welcome back</Text>

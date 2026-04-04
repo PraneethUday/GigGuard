@@ -1,4 +1,4 @@
-// GigGuard Design System — Dark Navy / Indigo / Amber
+// Worker Protection Insurance Platoform (WPIP) Design System — Dark Navy / Indigo / Amber
 // ui branch — new design
 
 export const COLORS = {

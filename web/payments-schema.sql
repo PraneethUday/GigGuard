@@ -1,5 +1,5 @@
 -- ============================================================
--- GigGuard Payments & Claims Schema
+-- Worker Protection Insurance Platoform (WPIP) Payments & Claims Schema
 -- Run in Supabase SQL Editor after supabase-schema.sql
 -- ============================================================
 

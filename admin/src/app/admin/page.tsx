@@ -233,10 +233,10 @@ export default function AdminPage() {
               color: "#fff",
             }}
           >
-            GG
+            WP
           </div>
           <span style={{ fontSize: 17, fontWeight: 700, color: "#fff" }}>
-            GigGuard
+            WPIP
           </span>
           <span
             style={{

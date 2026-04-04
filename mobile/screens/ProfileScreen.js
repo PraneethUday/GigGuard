@@ -88,7 +88,7 @@ export default function ProfileScreen({ navigation }) {
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
-          <Text style={styles.name}>{user?.name || "GigGuard User"}</Text>
+          <Text style={styles.name}>{user?.name || "WPIP User"}</Text>
           <Text style={styles.zone}>
             {user?.city || "Unknown City"} · {labelTier(user?.tier)}
           </Text>
@@ -204,7 +204,7 @@ export default function ProfileScreen({ navigation }) {
           <Text style={styles.logoutText}>Sign Out</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footer}>GigGuard v1.0.0 · IRDAI Registered</Text>
+        <Text style={styles.footer}>WPIP v1.0.0 · IRDAI Registered</Text>
       </ScrollView>
     </SafeAreaView>
   );

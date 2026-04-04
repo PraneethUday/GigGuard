@@ -1,8 +1,8 @@
 import { SignJWT, jwtVerify } from "jose";
 import bcrypt from "bcryptjs";
 
-const primarySecret = process.env.JWT_SECRET || "gigguard-dev-secret";
-const legacyDevSecret = "gigguard-dev-secret";
+const primarySecret = process.env.JWT_SECRET || "wpip-dev-secret";
+const legacyDevSecret = "wpip-dev-secret";
 
 const signingSecret = new TextEncoder().encode(primarySecret);
 
