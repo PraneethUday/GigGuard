@@ -38,6 +38,7 @@ from ml.premium_model import (
     TIER_CONFIG,
 )
 from triggers import poll_triggers, get_trigger_status, test_fire_trigger
+import cooldown as city_cooldown
 from ml.traffic import fetch_traffic_tti, compute_traffic_risk
 from ml.curfew import evaluate_curfew_risk
 
@@ -1246,6 +1247,27 @@ async def regional_exposure():
         return {"status": "ok", "exposure": exposure}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+# ---------------------------------------------------------------------------
+# Admin: city claim cooldown feature flag
+# ---------------------------------------------------------------------------
+
+@app.get("/api/admin/cooldown")
+def get_cooldown_status():
+    """Return the current cooldown feature state and per-city cooldown windows."""
+    return city_cooldown.get_status()
+
+
+class CooldownToggleRequest(BaseModel):
+    enabled: bool
+
+
+@app.post("/api/admin/cooldown/toggle")
+def toggle_cooldown(req: CooldownToggleRequest):
+    """Enable or disable the city claim cooldown feature."""
+    city_cooldown.set_enabled(req.enabled)
+    return city_cooldown.get_status()
+
 
 class SimulatorRequest(BaseModel):
     daily_wage: float = 500.0

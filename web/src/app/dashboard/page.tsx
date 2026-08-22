@@ -763,6 +763,7 @@ export default function DashboardPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
+
   const fetchCurrentPremium = async (u: User) => {
     if (!u.delivery_id) return;
     setLoadingCurrent(true);
@@ -2466,6 +2467,7 @@ export default function DashboardPage() {
                     })}
                   </div>
                 </div>
+
               </div>
             )}
           </div>

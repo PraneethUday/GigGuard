@@ -25,6 +25,7 @@ import uuid
 import asyncio
 from datetime import date, datetime
 
+import cooldown as city_cooldown
 from db import supabase, PLATFORM_TABLES
 from ml.weather import fetch_weather
 from ml.traffic import fetch_traffic_tti
@@ -343,6 +344,12 @@ def _auto_create_claims(
 
     Returns the number of claims created.
     """
+    if city_cooldown.is_blocked(city):
+        logger.info(
+            "[triggers] City %s is in cooldown — claim creation skipped.", city
+        )
+        return 0
+
     claims_created = 0
 
     # Find all unique workers in this city across all platform tables
@@ -467,6 +474,9 @@ def _auto_create_claims(
                 "[triggers] Failed to create claim for worker %s: %s",
                 worker_id, exc,
             )
+
+    if claims_created > 0:
+        city_cooldown.record_claim(city)
 
     logger.info(
         "[triggers] Created/updated %d claims for event %s in %s.",
