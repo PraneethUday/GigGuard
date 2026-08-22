@@ -198,12 +198,14 @@ def _check_curfew_zone_mismatch(
     so this returns 0.0 (no mismatch penalty).
     """
     return 0.0
-
-
 def compute_fraud_score(
     features: dict, trigger_type: str = ""
 ) -> tuple[float, list[str]]:
-    """Score a claim and return (fraud_score, fraud_flags)."""
+    """Score a claim and return `(fraud_score, fraud_flags)`.
+
+    Primary path: call external ML service.
+    Fallback path: local rule-based scoring.
+    """
     claim_data = {
         "delivery_activity_detected": features.get("cross_platform_flag", 0) > 0,
         "duplicate_claim": (features.get("claim_count_30d", 0) or 0) > 5,
@@ -258,6 +260,7 @@ def _rule_based_score(
         score += 0.10
         flags.append("high_cumulative_payout")
 
+    # Curfew mismatch is a strong fraud signal when available.
     if trigger_type == "curfew" and (features.get("curfew_zone_mismatch", 0) or 0) > 0:
         score += 0.50
         flags.append("curfew_zone_mismatch")
