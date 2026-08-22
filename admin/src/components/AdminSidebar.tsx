@@ -178,6 +178,32 @@ const IconReports = () => (
   </svg>
 );
 
+const IconPayments = () => (
+  <svg width="16" height="16" fill="none" viewBox="0 0 16 16">
+    <rect
+      x="1"
+      y="3.5"
+      width="14"
+      height="10"
+      rx="1.5"
+      stroke="currentColor"
+      strokeWidth="1.5"
+    />
+    <path
+      d="M1 7h14"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <path
+      d="M4 11h3M11 11h1"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+  </svg>
+);
+
 const IconShield = () => (
   <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
     <path
@@ -199,6 +225,7 @@ const NAV_MAIN: NavItem[] = [
   { href: "/admin", label: "Overview", icon: <IconOverview />, exact: true },
   { href: "/workers", label: "Workers", icon: <IconWorkers /> },
   { href: "/claims", label: "Claims", icon: <IconClaims /> },
+  { href: "/payments", label: "Payments", icon: <IconPayments /> },
   { href: "/support", label: "Support", icon: <IconSupport /> },
   { href: "/disruptions", label: "Disruptions", icon: <IconDisruptions /> },
   {

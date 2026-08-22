@@ -1,0 +1,45 @@
+# Python bytecode / cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+**/__pycache__/
+
+# Virtual environments (deps get installed fresh inside the image)
+venv/
+.venv/
+env/
+
+# Secrets — real values are injected as Container Apps secrets at runtime,
+# never baked into the image
+.env
+.env.*
+!.env.example
+
+# Tests / dev tooling
+tests/
+test_*.py
+*_test.py
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# VCS / editor / OS cruft
+.git/
+.gitignore
+.gitattributes
+.idea/
+.vscode/
+.DS_Store
+
+# NOTE: ml/saved_models/*.joblib and model_metadata.json are intentionally
+# NOT excluded — ml/premium_model.py loads them at request time
+# (load_model()/load_metadata()), so the shipped premium-prediction
+# endpoint needs them present in the image. They're small (~450 KB).
+
+# Local docs / misc not needed at runtime
+README.md
+*.md
+render.yaml
+Procfile

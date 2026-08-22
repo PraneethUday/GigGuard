@@ -136,6 +136,13 @@ const HomeScreen = ({ navigation }) => {
   const [trafficLive, setTrafficLive] = useState(null);
   const [curfewLive, setCurfewLive] = useState(null);
 
+  // Chat state
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState("");
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatScrollRef = React.useRef(null);
+
   // Payment modal state
   const [showPayModal, setShowPayModal] = useState(false);
   const [payMethod, setPayMethod] = useState("upi");
@@ -312,6 +319,29 @@ const HomeScreen = ({ navigation }) => {
       setPayError(e.message || "Payment failed. Please try again.");
     } finally {
       setPaying(false);
+    }
+  }
+
+  async function sendChat() {
+    const text = chatInput.trim();
+    if (!text || chatLoading) return;
+    const userMsg = { role: "user", content: text };
+    const updated = [...chatMessages, userMsg];
+    setChatMessages(updated);
+    setChatInput("");
+    setChatLoading(true);
+    try {
+      const data = await api.sendChatMessage(updated);
+      const reply = data.reply || "Sorry, I couldn't get a response right now.";
+      setChatMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+    } catch {
+      setChatMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Something went wrong. Please try again." },
+      ]);
+    } finally {
+      setChatLoading(false);
+      setTimeout(() => chatScrollRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }
 
@@ -1140,49 +1170,143 @@ const HomeScreen = ({ navigation }) => {
 
       {/* ── Bottom Nav ── */}
       <View style={styles.bottomNav}>
-        {[
-          { icon: "home", label: t("nav_home"), route: null, active: true },
-          {
-            icon: "document-outline",
-            label: t("nav_claims"),
-            route: "Claims",
-            active: false,
-          },
-          {
-            icon: "shield-outline",
-            label: t("nav_policy"),
-            route: "Policy",
-            active: false,
-          },
-          {
-            icon: "person-outline",
-            label: t("nav_profile"),
-            route: "Profile",
-            active: false,
-          },
-        ].map((tab) => (
-          <TouchableOpacity
-            key={tab.label}
-            style={styles.navItem}
-            onPress={
-              tab.route ? () => navigation.navigate(tab.route) : undefined
-            }
-          >
-            <View style={tab.active ? styles.navActiveWrap : null}>
-              <Ionicons
-                name={tab.icon}
-                size={22}
-                color={tab.active ? COLORS.primary : COLORS.textFaint}
-              />
-            </View>
-            <Text
-              style={[styles.navLabel, tab.active && { color: COLORS.primary }]}
-            >
-              {tab.label}
-            </Text>
+        {/* Home */}
+        <TouchableOpacity style={styles.navItem}>
+          <View style={styles.navActiveWrap}>
+            <Ionicons name="home" size={22} color={COLORS.primary} />
+          </View>
+          <Text style={[styles.navLabel, { color: COLORS.primary }]}>{t("nav_home")}</Text>
+        </TouchableOpacity>
+
+        {/* Claims */}
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Claims")}>
+          <Ionicons name="document-outline" size={22} color={COLORS.textFaint} />
+          <Text style={styles.navLabel}>{t("nav_claims")}</Text>
+        </TouchableOpacity>
+
+        {/* Center AI Chat button */}
+        <View style={styles.navChatWrap}>
+          <TouchableOpacity style={styles.navChatBtn} onPress={() => setChatOpen(true)} activeOpacity={0.85}>
+            <Ionicons name={chatOpen ? "close" : "chatbubble-ellipses"} size={24} color="#fff" />
           </TouchableOpacity>
-        ))}
+          <Text style={styles.navChatLabel}>AI Chat</Text>
+        </View>
+
+        {/* Policy */}
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Policy")}>
+          <Ionicons name="shield-outline" size={22} color={COLORS.textFaint} />
+          <Text style={styles.navLabel}>{t("nav_policy")}</Text>
+        </TouchableOpacity>
+
+        {/* Profile */}
+        <TouchableOpacity style={styles.navItem} onPress={() => navigation.navigate("Profile")}>
+          <Ionicons name="person-outline" size={22} color={COLORS.textFaint} />
+          <Text style={styles.navLabel}>{t("nav_profile")}</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* ── AI Chat Modal ── */}
+      <Modal
+        visible={chatOpen}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setChatOpen(false)}
+      >
+        <KeyboardAvoidingView
+          style={styles.chatOverlay}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <TouchableOpacity style={styles.chatBackdrop} activeOpacity={1} onPress={() => setChatOpen(false)} />
+          <View style={styles.chatSheet}>
+            {/* Header */}
+            <View style={styles.chatHeader}>
+              <View style={styles.chatHeaderLeft}>
+                <View style={styles.chatAvatar}>
+                  <Text style={styles.chatAvatarText}>AI</Text>
+                </View>
+                <View>
+                  <Text style={styles.chatTitle}>WPIP Assistant</Text>
+                  <Text style={styles.chatSubtitle}>Ask me anything about your coverage</Text>
+                </View>
+              </View>
+              <TouchableOpacity onPress={() => setChatOpen(false)} style={styles.chatCloseBtn}>
+                <Ionicons name="close" size={20} color={COLORS.textFaint} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Messages */}
+            <ScrollView
+              ref={chatScrollRef}
+              style={styles.chatBody}
+              contentContainerStyle={styles.chatBodyContent}
+              showsVerticalScrollIndicator={false}
+              onContentSizeChange={() => chatScrollRef.current?.scrollToEnd({ animated: true })}
+            >
+              {chatMessages.length === 0 && (
+                <View style={styles.chatEmpty}>
+                  <View style={styles.chatEmptyIcon}>
+                    <Ionicons name="chatbubble-ellipses-outline" size={32} color={COLORS.primary} />
+                  </View>
+                  <Text style={styles.chatEmptyTitle}>Hi! I&apos;m your WPIP assistant.</Text>
+                  <Text style={styles.chatEmptyHint}>Ask me about claims, premiums, coverage, or how the platform works.</Text>
+                  <View style={styles.chatSuggestions}>
+                    {["How do claims work?", "What does Standard cover?", "When will I get paid?"].map((s) => (
+                      <TouchableOpacity key={s} style={styles.chatSuggestion} onPress={() => setChatInput(s)}>
+                        <Text style={styles.chatSuggestionText}>{s}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </View>
+              )}
+              {chatMessages.map((msg, i) => (
+                <View key={i} style={[styles.chatBubbleRow, msg.role === "user" && styles.chatBubbleRowUser]}>
+                  {msg.role === "assistant" && (
+                    <View style={styles.chatBubbleAvatar}>
+                      <Text style={styles.chatBubbleAvatarText}>AI</Text>
+                    </View>
+                  )}
+                  <View style={[styles.chatBubble, msg.role === "user" ? styles.chatBubbleUser : styles.chatBubbleAssistant]}>
+                    <Text style={[styles.chatBubbleText, msg.role === "user" && styles.chatBubbleTextUser]}>{msg.content}</Text>
+                  </View>
+                </View>
+              ))}
+              {chatLoading && (
+                <View style={styles.chatBubbleRow}>
+                  <View style={styles.chatBubbleAvatar}>
+                    <Text style={styles.chatBubbleAvatarText}>AI</Text>
+                  </View>
+                  <View style={[styles.chatBubble, styles.chatBubbleAssistant]}>
+                    <ActivityIndicator size="small" color={COLORS.textFaint} />
+                  </View>
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Input */}
+            <View style={styles.chatInputRow}>
+              <TextInput
+                style={styles.chatInput}
+                placeholder="Ask anything…"
+                placeholderTextColor={COLORS.textFaint}
+                value={chatInput}
+                onChangeText={setChatInput}
+                onSubmitEditing={sendChat}
+                returnKeyType="send"
+                editable={!chatLoading}
+                multiline={false}
+              />
+              <TouchableOpacity
+                style={[styles.chatSendBtn, (!chatInput.trim() || chatLoading) && styles.chatSendBtnDisabled]}
+                onPress={sendChat}
+                disabled={!chatInput.trim() || chatLoading}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="send" size={16} color="#fff" />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -1905,7 +2029,7 @@ const createStyles = (COLORS, FONTS) =>
       alignItems: "center",
       paddingBottom: Platform.OS === "ios" ? 14 : 0,
     },
-    navItem: { alignItems: "center", justifyContent: "center" },
+    navItem: { alignItems: "center", justifyContent: "center", flex: 1, paddingVertical: 4 },
     navActiveWrap: {
       backgroundColor: COLORS.primaryContainer,
       width: 40,
@@ -1919,6 +2043,225 @@ const createStyles = (COLORS, FONTS) =>
       fontFamily: FONTS.medium,
       color: COLORS.textFaint,
       marginTop: 3,
+    },
+
+    // Center chat button in nav
+    navChatWrap: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: -22,
+    },
+    navChatBtn: {
+      width: 52,
+      height: 52,
+      borderRadius: 26,
+      backgroundColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      borderWidth: 3,
+      borderColor: COLORS.surfaceContainer,
+      ...SHADOWS.button,
+    },
+    navChatLabel: {
+      fontSize: 10,
+      fontFamily: FONTS.medium,
+      color: COLORS.primary,
+      marginTop: 4,
+    },
+
+    // ── Chat Modal ──
+    chatOverlay: {
+      flex: 1,
+      justifyContent: "flex-end",
+    },
+    chatBackdrop: {
+      flex: 1,
+      backgroundColor: "rgba(0,0,0,0.45)",
+    },
+    chatSheet: {
+      backgroundColor: COLORS.surfaceContainer,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      maxHeight: "82%",
+      borderTopWidth: 1,
+      borderColor: COLORS.border,
+    },
+    chatHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: COLORS.border,
+    },
+    chatHeaderLeft: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 10,
+    },
+    chatAvatar: {
+      width: 36,
+      height: 36,
+      borderRadius: 18,
+      backgroundColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    chatAvatarText: {
+      fontSize: 11,
+      fontFamily: FONTS.bold,
+      color: "#fff",
+    },
+    chatTitle: {
+      fontSize: 14,
+      fontFamily: FONTS.semiBold,
+      color: COLORS.text,
+    },
+    chatSubtitle: {
+      fontSize: 11,
+      fontFamily: FONTS.regular,
+      color: COLORS.textFaint,
+      marginTop: 1,
+    },
+    chatCloseBtn: {
+      padding: 6,
+      borderRadius: 8,
+    },
+    chatBody: {
+      flexGrow: 0,
+      maxHeight: 380,
+    },
+    chatBodyContent: {
+      padding: 14,
+      gap: 10,
+    },
+    chatEmpty: {
+      alignItems: "center",
+      paddingVertical: 20,
+      gap: 8,
+    },
+    chatEmptyIcon: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      backgroundColor: COLORS.primaryContainer,
+      alignItems: "center",
+      justifyContent: "center",
+      marginBottom: 4,
+    },
+    chatEmptyTitle: {
+      fontSize: 14,
+      fontFamily: FONTS.semiBold,
+      color: COLORS.text,
+      textAlign: "center",
+    },
+    chatEmptyHint: {
+      fontSize: 12,
+      fontFamily: FONTS.regular,
+      color: COLORS.textFaint,
+      textAlign: "center",
+      lineHeight: 18,
+      paddingHorizontal: 10,
+    },
+    chatSuggestions: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "center",
+      gap: 8,
+      marginTop: 8,
+    },
+    chatSuggestion: {
+      backgroundColor: COLORS.surfaceHigh,
+      borderRadius: 20,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    },
+    chatSuggestionText: {
+      fontSize: 11,
+      fontFamily: FONTS.medium,
+      color: COLORS.textMuted,
+    },
+    chatBubbleRow: {
+      flexDirection: "row",
+      alignItems: "flex-end",
+      gap: 8,
+      marginBottom: 2,
+    },
+    chatBubbleRowUser: {
+      flexDirection: "row-reverse",
+    },
+    chatBubbleAvatar: {
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      flexShrink: 0,
+    },
+    chatBubbleAvatarText: {
+      fontSize: 9,
+      fontFamily: FONTS.bold,
+      color: "#fff",
+    },
+    chatBubble: {
+      maxWidth: "78%",
+      borderRadius: 16,
+      paddingHorizontal: 12,
+      paddingVertical: 9,
+    },
+    chatBubbleAssistant: {
+      backgroundColor: COLORS.surfaceHigh,
+      borderBottomLeftRadius: 4,
+    },
+    chatBubbleUser: {
+      backgroundColor: COLORS.primary,
+      borderBottomRightRadius: 4,
+    },
+    chatBubbleText: {
+      fontSize: 13,
+      fontFamily: FONTS.regular,
+      color: COLORS.text,
+      lineHeight: 19,
+    },
+    chatBubbleTextUser: {
+      color: "#fff",
+    },
+    chatInputRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 8,
+      padding: 12,
+      borderTopWidth: 1,
+      borderTopColor: COLORS.border,
+      paddingBottom: Platform.OS === "ios" ? 28 : 12,
+    },
+    chatInput: {
+      flex: 1,
+      height: 40,
+      backgroundColor: COLORS.surfaceHigh,
+      borderRadius: 20,
+      paddingHorizontal: 14,
+      fontSize: 13,
+      fontFamily: FONTS.regular,
+      color: COLORS.text,
+      borderWidth: 1,
+      borderColor: COLORS.border,
+    },
+    chatSendBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: COLORS.primary,
+      alignItems: "center",
+      justifyContent: "center",
+      ...SHADOWS.button,
+    },
+    chatSendBtnDisabled: {
+      opacity: 0.4,
     },
   });
 

@@ -10,7 +10,8 @@ async function proxyRequest(
 ) {
     const { path } = await params;
     const apiPath = path.join("/");
-    const url = `${BACKEND_URL}/api/${apiPath}`;
+    const qs = req.nextUrl.searchParams.toString();
+    const url = `${BACKEND_URL}/api/${apiPath}${qs ? `?${qs}` : ""}`;
 
     try {
         const fetchOptions: RequestInit = {

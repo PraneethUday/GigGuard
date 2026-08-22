@@ -24,8 +24,7 @@ const PLATFORMS = [
 ];
 
 const CITIES = [
-  "Bengaluru", "Chennai", "Delhi", "Mumbai", "Hyderabad",
-  "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Surat",
+  "Bengaluru", "Chennai", "Delhi", "Hyderabad", "Mumbai", "Pune",
 ];
 
 const STEPS = ["Platform", "Personal Info", "Documents", "Coverage"];
@@ -64,6 +63,7 @@ export default function RegisterPage() {
   const [verifyResult, setVerifyResult] = useState<{
     verified: boolean;
     matched_platforms: string[];
+    detected_city?: string | null;
   } | null>(null);
 
   const [form, setForm] = useState<Form>({
@@ -139,6 +139,9 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) { setError(data.error || "Verification failed."); return; }
       setVerifyResult(data);
+      if (data.verified && data.detected_city) {
+        update("city", data.detected_city);
+      }
       if (!data.verified) {
         setError("Your Delivery Partner ID was not found. You can still register, but manual admin verification will be required.");
       }
@@ -317,12 +320,18 @@ export default function RegisterPage() {
                     value={form.city}
                     onChange={(e) => update("city", e.target.value)}
                     title="Select your city"
+                    disabled={!!(verifyResult?.verified && verifyResult?.detected_city)}
                   >
                     <option value="">Select city</option>
                     {CITIES.map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
+                  {verifyResult?.verified && verifyResult?.detected_city && (
+                    <p className={styles.fieldHintAccent}>
+                      City auto-detected from your platform: {verifyResult.detected_city}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className={styles.fieldLabel}>Delivery Area / Zone</label>

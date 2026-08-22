@@ -252,6 +252,14 @@ export async function getCityCurfew(city) {
 }
 
 
+// AI Chat
+export function sendChatMessage(messages) {
+  return request(`${WEB_URL}/api/chat`, {
+    method: "POST",
+    body: JSON.stringify({ messages }),
+  });
+}
+
 // Support / Escalation
 export function submitSupportTicket(token, payload) {
   return request(`${WEB_URL}/api/support/tickets`, {

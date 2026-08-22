@@ -38,6 +38,7 @@ from ml.premium_model import (
     TIER_CONFIG,
 )
 from triggers import poll_triggers, get_trigger_status, test_fire_trigger
+import cooldown as city_cooldown
 from ml.traffic import fetch_traffic_tti, compute_traffic_risk
 from ml.curfew import evaluate_curfew_risk
 
@@ -231,6 +232,66 @@ def _safe_user(user_row: dict) -> dict:
     return {k: user_row.get(k) for k in allowed_fields if k in user_row}
 
 
+def _normalize_city(city: str | None) -> str:
+    value = " ".join(str(city or "").strip().lower().split())
+    aliases = {
+        "bangalore": "bengaluru",
+        "bangaluru": "bengaluru",
+        "banglore": "bengaluru",
+        "bengaluru": "bengaluru",
+        "new delhi": "delhi",
+    }
+    return aliases.get(value, value)
+
+
+def _get_registered_claim_user_index() -> dict[str, str]:
+    """Return delivery_id -> normalized registered city for claim visibility.
+
+    Only active registrations are included. Rejected registrations are excluded.
+    """
+    try:
+        resp = (
+            supabase.table("registered_workers")
+            .select("delivery_id, city")
+            .eq("is_active", True)
+            .neq("verification_status", "rejected")
+            .execute()
+        )
+    except Exception as exc:
+        logger.error("Failed to load registered claim users: %s", exc)
+        return {}
+
+    index: dict[str, str] = {}
+    for row in resp.data or []:
+        delivery_id = str(row.get("delivery_id", "")).strip().lower()
+        city = _normalize_city(row.get("city"))
+        if delivery_id and city:
+            index[delivery_id] = city
+    return index
+
+
+def _filter_claim_rows_for_registered_city(
+    rows: list[dict],
+    registered_user_city_index: dict[str, str],
+) -> list[dict]:
+    """Keep claims where worker is registered and claim city matches registration city."""
+    filtered: list[dict] = []
+    for row in rows:
+        worker_id = str(row.get("worker_id", "")).strip().lower()
+        if not worker_id:
+            continue
+
+        registered_city = registered_user_city_index.get(worker_id)
+        if not registered_city:
+            continue
+
+        claim_city = _normalize_city(row.get("city"))
+        if claim_city == registered_city:
+            filtered.append(row)
+
+    return filtered
+
+
 @app.post("/api/auth/login")
 def auth_login(req: LoginRequest):
     email = (req.email or "").strip().lower()
@@ -306,6 +367,7 @@ def auth_register(req: RegisterRequest):
         raise HTTPException(status_code=500, detail="Registration failed. Please try again.")
 
     matched_platforms: list[str] = []
+    platform_city: str | None = None
     for platform in req.platforms:
         table = PLATFORM_TABLE.get(platform)
         if not table:
@@ -313,15 +375,25 @@ def auth_register(req: RegisterRequest):
         try:
             check = (
                 supabase.table(table)
-                .select("worker_id")
+                .select("worker_id, city")
                 .eq("worker_id", delivery_id)
                 .limit(1)
                 .execute()
             )
             if check.data:
                 matched_platforms.append(platform)
+                if not platform_city:
+                    platform_city = check.data[0].get("city") or None
         except Exception:
             continue
+
+    # Reject if the selected city doesn't match what the platform has on record.
+    if matched_platforms and platform_city:
+        if _normalize_city(req.city) != _normalize_city(platform_city):
+            raise HTTPException(
+                status_code=400,
+                detail=f"City mismatch: your delivery ID is registered in {platform_city}, but you selected {req.city}. Please select the correct city.",
+            )
 
     password_hash = hash_password(req.password)
     payload = {
@@ -412,6 +484,7 @@ def verify_delivery_id(req: VerifyIdRequest):
         )
 
     matched_platforms: list[str] = []
+    detected_city: str | None = None
     for platform in platforms:
         table = PLATFORM_TABLE.get(platform)
         if not table:
@@ -419,13 +492,15 @@ def verify_delivery_id(req: VerifyIdRequest):
         try:
             check = (
                 supabase.table(table)
-                .select("worker_id")
+                .select("worker_id, city")
                 .eq("worker_id", delivery_id)
                 .limit(1)
                 .execute()
             )
             if check.data:
                 matched_platforms.append(platform)
+                if not detected_city:
+                    detected_city = check.data[0].get("city") or None
         except Exception:
             continue
 
@@ -433,6 +508,7 @@ def verify_delivery_id(req: VerifyIdRequest):
         "verified": len(matched_platforms) > 0,
         "matched_platforms": matched_platforms,
         "checked_platforms": platforms,
+        "detected_city": detected_city,
     }
 
 
@@ -540,6 +616,13 @@ def get_worker_history(
 
 @app.get("/api/health")
 async def health_check():
+    return {"status": "ok"}
+
+
+@app.get("/health")
+async def health_check_root():
+    """Alias of /api/health at the conventional path Azure Container Apps
+    (and most container health-probe tooling) expects by default."""
     return {"status": "ok"}
 
 
@@ -859,30 +942,69 @@ async def get_disruptions(limit: int = Query(50, ge=1, le=500)):
 async def get_claims(limit: int = Query(100, ge=1, le=1000)):
     """Get recent auto-generated claims."""
     try:
+        registered_user_city_index = _get_registered_claim_user_index()
+        if not registered_user_city_index:
+            return {"count": 0, "data": []}
+
+        # Fetch extra rows because city-mismatch rows are filtered in-memory.
+        query_limit = min(5000, max(limit * 5, limit))
         resp = (
             supabase.table("claims")
             .select("*")
+            .in_("worker_id", sorted(registered_user_city_index.keys()))
             .order("created_at", desc=True)
-            .limit(limit)
+            .limit(query_limit)
             .execute()
         )
-        return {"count": len(resp.data), "data": resp.data}
+        filtered = _filter_claim_rows_for_registered_city(
+            resp.data or [], registered_user_city_index
+        )[:limit]
+        return {"count": len(filtered), "data": filtered}
     except Exception as e:
         return {"count": 0, "error": str(e), "data": []}
 
 
 @app.get("/api/claims/worker/{worker_id}")
-def get_worker_claims(worker_id: str):
-    """Get all claims for a specific worker."""
+def get_worker_claims(worker_id: str, after: str | None = None):
+    """Get all claims for a specific worker, filtered to on/after their registration date."""
     try:
-        resp = (
+        registered_user_city_index = _get_registered_claim_user_index()
+        worker_key = str(worker_id).strip().lower()
+        if worker_key not in registered_user_city_index:
+            return {"count": 0, "worker_id": worker_id, "data": []}
+
+        # Always use the registration date from the DB as the lower bound.
+        # The caller may pass `after` as an override, but we look it up directly
+        # from registered_workers using delivery_id so the filter is authoritative.
+        if not after:
+            try:
+                reg_resp = (
+                    supabase.table("registered_workers")
+                    .select("created_at")
+                    .eq("delivery_id", worker_id)
+                    .eq("is_active", True)
+                    .limit(1)
+                    .execute()
+                )
+                if reg_resp.data:
+                    after = str(reg_resp.data[0].get("created_at", "") or "")
+            except Exception:
+                pass
+
+        query = (
             supabase.table("claims")
             .select("*")
             .eq("worker_id", worker_id)
-            .order("created_at", desc=True)
-            .execute()
         )
-        return {"count": len(resp.data), "worker_id": worker_id, "data": resp.data}
+        if after:
+            query = query.gte("created_at", after)
+        query = query.order("created_at", desc=True)
+        resp = query.execute()
+
+        filtered = _filter_claim_rows_for_registered_city(
+            resp.data or [], registered_user_city_index
+        )
+        return {"count": len(filtered), "worker_id": worker_id, "data": filtered}
     except Exception as e:
         return {"count": 0, "error": str(e), "data": []}
 
@@ -933,18 +1055,93 @@ def update_claim(claim_id: str, req: ClaimUpdateRequest):
         return {"error": str(e), "claim": None}
 
 
+@app.post("/api/claims/{claim_id}/rescore")
+def rescore_claim(claim_id: str):
+    """Re-evaluate fraud score for an existing claim using the worker's registration date as cutoff."""
+    from ml.fraud_model import build_fraud_features, compute_fraud_score
+
+    try:
+        # Fetch the claim
+        resp = supabase.table("claims").select("*").eq("id", claim_id).limit(1).execute()
+        if not resp.data:
+            return {"error": "Claim not found"}, 404
+        claim = resp.data[0]
+
+        worker_id = claim.get("worker_id", "")
+        payout_amount = float(claim.get("payout_amount") or 0)
+        daily_wage = float(claim.get("daily_wage_est") or 0)
+        cross_clear = bool(claim.get("cross_platform_clear", True))
+        trigger_type = claim.get("trigger_type", "")
+
+        # Fetch worker registration date for cutoff
+        reg_resp = (
+            supabase.table("registered_workers")
+            .select("created_at")
+            .eq("delivery_id", worker_id)
+            .eq("is_active", True)
+            .limit(1)
+            .execute()
+        )
+        registration_date = None
+        if reg_resp.data:
+            registration_date = reg_resp.data[0].get("created_at")
+
+        features = build_fraud_features(
+            worker_id=worker_id,
+            city=claim.get("city", ""),
+            payout_amount=payout_amount,
+            daily_wage=daily_wage,
+            cross_platform_clear=cross_clear,
+            supabase_client=supabase,
+            trigger_type=trigger_type,
+            registration_date=registration_date,
+        )
+        fraud_score, fraud_flags = compute_fraud_score(features, trigger_type=trigger_type)
+
+        # Update the claim in DB
+        new_status = "auto_initiated" if fraud_score < 0.75 else "under_review"
+        new_payout_status = "approved" if fraud_score < 0.75 else "pending"
+        update_resp = (
+            supabase.table("claims")
+            .update({
+                "fraud_score": fraud_score,
+                "fraud_flags": fraud_flags,
+                "status": new_status,
+                "payout_status": new_payout_status,
+            })
+            .eq("id", claim_id)
+            .execute()
+        )
+        if update_resp.data:
+            return {"claim": update_resp.data[0], "fraud_score": fraud_score, "fraud_flags": fraud_flags}
+        return {"error": "Update failed"}
+    except Exception as e:
+        logger.error("[rescore] Failed for claim %s: %s", claim_id, e)
+        return {"error": str(e)}
+
+
 @app.get("/api/claims/all")
 async def get_claims_all(limit: int = Query(200, ge=1, le=1000)):
     """Admin-facing endpoint: returns all claims across all workers."""
     try:
+        registered_user_city_index = _get_registered_claim_user_index()
+        if not registered_user_city_index:
+            return {"count": 0, "claims": [], "data": []}
+
+        # Fetch extra rows because city-mismatch rows are filtered in-memory.
+        query_limit = min(5000, max(limit * 5, limit))
         resp = (
             supabase.table("claims")
             .select("*")
+            .in_("worker_id", sorted(registered_user_city_index.keys()))
             .order("created_at", desc=True)
-            .limit(limit)
+            .limit(query_limit)
             .execute()
         )
-        return {"count": len(resp.data), "claims": resp.data, "data": resp.data}
+        filtered = _filter_claim_rows_for_registered_city(
+            resp.data or [], registered_user_city_index
+        )[:limit]
+        return {"count": len(filtered), "claims": filtered, "data": filtered}
     except Exception as e:
         return {"count": 0, "error": str(e), "claims": [], "data": []}
 
@@ -1057,6 +1254,27 @@ async def regional_exposure():
         return {"status": "ok", "exposure": exposure}
     except Exception as e:
         return {"status": "error", "error": str(e)}
+
+# ---------------------------------------------------------------------------
+# Admin: city claim cooldown feature flag
+# ---------------------------------------------------------------------------
+
+@app.get("/api/admin/cooldown")
+def get_cooldown_status():
+    """Return the current cooldown feature state and per-city cooldown windows."""
+    return city_cooldown.get_status()
+
+
+class CooldownToggleRequest(BaseModel):
+    enabled: bool
+
+
+@app.post("/api/admin/cooldown/toggle")
+def toggle_cooldown(req: CooldownToggleRequest):
+    """Enable or disable the city claim cooldown feature."""
+    city_cooldown.set_enabled(req.enabled)
+    return city_cooldown.get_status()
+
 
 class SimulatorRequest(BaseModel):
     daily_wage: float = 500.0

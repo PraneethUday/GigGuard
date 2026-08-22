@@ -123,6 +123,17 @@ const IconChevron = ({ open }: { open: boolean }) => (
   </svg>
 );
 
+// delivery_id → sorted payment dates (ms) for coverage check
+type PaymentCoverage = Map<string, number[]>;
+
+function hasPremiumCoverage(coverage: PaymentCoverage, deliveryId: string, claimCreatedAt: string): boolean {
+  const dates = coverage.get(deliveryId.toLowerCase());
+  if (!dates || dates.length === 0) return false;
+  const claimMs = new Date(claimCreatedAt).getTime();
+  const weekMs = 7 * 24 * 60 * 60 * 1000;
+  return dates.some((d) => d <= claimMs && d >= claimMs - weekMs);
+}
+
 export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(true);
@@ -135,9 +146,11 @@ export default function ClaimsPage() {
     {},
   );
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [coverage, setCoverage] = useState<PaymentCoverage>(new Map());
 
   useEffect(() => {
     fetchClaims();
+    fetchCoverage();
   }, []);
 
   useEffect(() => {
@@ -146,6 +159,22 @@ export default function ClaimsPage() {
     const q = (params.get("q") || "").trim().toLowerCase();
     setSearchQuery(q);
   }, []);
+
+  const fetchCoverage = () => {
+    fetch("/api/admin/payments")
+      .then((r) => r.json())
+      .then((data) => {
+        const map: PaymentCoverage = new Map();
+        for (const p of data.payments || []) {
+          if (p.status !== "success" || !p.worker?.delivery_id) continue;
+          const key = String(p.worker.delivery_id).toLowerCase();
+          if (!map.has(key)) map.set(key, []);
+          map.get(key)!.push(new Date(p.created_at).getTime());
+        }
+        setCoverage(map);
+      })
+      .catch(() => { /* silently fail — coverage badges become "unknown" */ });
+  };
 
   const fetchClaims = () => {
     setLoading(true);
@@ -156,6 +185,39 @@ export default function ClaimsPage() {
       })
       .catch(() => setError("Failed to load claims"))
       .finally(() => setLoading(false));
+  };
+
+  const rescoreClaim = async (claimId: string) => {
+    setUpdatingId(claimId);
+    setNotice("");
+    setError("");
+    try {
+      const res = await fetch("/api/claims/rescore", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ claimId }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setError(data.error || "Rescore failed");
+        return;
+      }
+      setClaims((prev) =>
+        prev.map((c) =>
+          c.id !== claimId ? c : {
+            ...c,
+            fraud_score: data.fraud_score ?? c.fraud_score,
+            fraud_flags: data.fraud_flags ?? c.fraud_flags,
+            ...(data.claim ?? {}),
+          }
+        )
+      );
+      setNotice(`Fraud score recalculated: ${Math.round((data.fraud_score ?? 0) * 100)}%`);
+    } catch {
+      setError("Rescore request failed");
+    } finally {
+      setUpdatingId(null);
+    }
   };
 
   const updateClaim = async (
@@ -328,6 +390,7 @@ export default function ClaimsPage() {
                   <th>Trigger</th>
                   <th>Payout</th>
                   <th>Fraud Score</th>
+                  <th>Coverage</th>
                   <th>Status</th>
                   <th>Created</th>
                   <th>Actions</th>
@@ -378,6 +441,15 @@ export default function ClaimsPage() {
                       </td>
                       <td>
                         <FraudBar score={c.fraud_score} />
+                      </td>
+                      <td>
+                        {coverage.size === 0 ? (
+                          <span className="badge badgeGray">—</span>
+                        ) : hasPremiumCoverage(coverage, c.worker_id, c.created_at) ? (
+                          <span className="badge badgeGreen">Paid ✓</span>
+                        ) : (
+                          <span className="badge badgeRed">Unpaid ✗</span>
+                        )}
                       </td>
                       <td>
                         <ClaimStatusBadge
@@ -457,6 +529,21 @@ export default function ClaimsPage() {
                                 Reject
                               </button>
                             </>
+                          )}
+                          {c.fraud_score >= 0.75 && (
+                            <button
+                              type="button"
+                              className="btn btnSm"
+                              disabled={updatingId === c.id}
+                              onClick={() => rescoreClaim(c.id)}
+                              style={{
+                                background: "#F0F9FF",
+                                color: "#0369A1",
+                                border: "1px solid #BAE6FD",
+                              }}
+                            >
+                              {updatingId === c.id ? "…" : "Rescore"}
+                            </button>
                           )}
                         </div>
                       </td>
