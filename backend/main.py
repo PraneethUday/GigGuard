@@ -619,6 +619,13 @@ async def health_check():
     return {"status": "ok"}
 
 
+@app.get("/health")
+async def health_check_root():
+    """Alias of /api/health at the conventional path Azure Container Apps
+    (and most container health-probe tooling) expects by default."""
+    return {"status": "ok"}
+
+
 # ---------------------------------------------------------------------------
 # ML Premium Endpoints
 # ---------------------------------------------------------------------------
